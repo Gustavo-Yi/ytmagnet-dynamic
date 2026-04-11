@@ -1,0 +1,229 @@
+/* ── Main Header (Pure Transparent) ── */
+.main-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  height: 80px;
+  padding: 0 40px;
+  color: white;
+  background: transparent;
+  transition: all 0.4s;
+  user-select: none;
+}
+
+/* Sub-pages: purely transparent — same as homepage */
+.header-subpage {
+  background: transparent;
+}
+
+.header-logo {
+  margin-right: auto;
+}
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.logo-img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
+}
+
+.logo-text {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: white;
+  text-decoration: none;
+  line-height: 1;
+  position: relative;
+  top: -2px;
+}
+
+/* ── Individual Nav Boxes (Glassmorphism) ── */
+.main-nav > ul {
+  display: flex;
+  gap: 10px; /* Space between boxes */
+  align-items: center;
+}
+
+.nav-item-box {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px; /* Square with slight round as per YT Auto */
+  transition: all 0.3s ease;
+}
+
+.nav-item-box:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.nav-item-box > a {
+  display: block;
+  padding: 10px 20px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 400;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.arrow {
+  font-size: 10px;
+  margin-left: 6px;
+  opacity: 0.7;
+}
+
+/* ── Dropdown within Box ── */
+.has-dropdown {
+  position: relative;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  min-width: 100%;
+  /* Same glass style as language switcher */
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all 0.25s;
+  list-style: none;
+}
+
+.has-dropdown:hover .dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown li a {
+  display: block;
+  padding: 9px 12px;
+  border-radius: 8px;
+  color: white;
+  font-size: 13px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.dropdown li a:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ── Flag Language Selector (3rd Image Reference) ── */
+.lang-selector-container {
+  position: relative;
+  margin-left: 20px;
+  flex-shrink: 0;
+}
+
+.lang-trigger-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
+  padding: 8px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.3s;
+}
+
+.lang-trigger-box:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Real flag image from flagcdn.com */
+.flag-img {
+  width: 20px;
+  height: 15px;
+  object-fit: cover;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.lang-text {
+  font-size: 13px;
+  font-weight: 400;
+  color: white;
+  white-space: nowrap;
+}
+
+.arrow-small {
+  font-size: 9px;
+  opacity: 0.6;
+  transition: transform 0.3s;
+  margin-left: 2px;
+}
+
+.arrow-small.up {
+  transform: rotate(180deg);
+}
+
+/* Language dropdown — same width as trigger, perfectly aligned */
+.lang-dropdown-box {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;          /* align to left edge of .lang-selector-container */
+  right: 0;         /* align to right edge — so width = trigger width exactly */
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.lang-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.lang-option:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.lang-option.active {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.option-text {
+  color: white;
+  font-size: 13px;
+}

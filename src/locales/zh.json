@@ -1,0 +1,71 @@
+{
+  "site": {
+    "name": "YT Magnet - 钰彤磁业",
+    "description": "专业磁性材料制造商，提供铁氧体、钕铁硼、光伏及锂电整体解决方案"
+  },
+  "cookie": {
+    "title": "我们使用 Cookie",
+    "desc": "我们使用 Cookie 来改善您的浏览体验、分析网站流量并提供个性化内容。点击“接受全部”即表示您同意我们使用所有 Cookie。",
+    "acceptAll": "接受全部",
+    "essential": "仅必要项",
+    "learnMore": "了解更多"
+  },
+  "nav": {
+    "home": "首页",
+    "about": "关于我们",
+    "products": "产品中心",
+    "news": "新闻中心",
+    "contact": "联系我们",
+    "products_sub": {
+      "ferrite": "铁氧体",
+      "ndfeb": "钕铁硼"
+    }
+  },
+  "home": {
+    "slides": {
+      "magnetic": { "title": "世界磁都", "desc": "铁氧体·钕铁硼·铝镍钴" },
+      "devices":  { "title": "延伸器件", "desc": "变压器·滤波器·电感器" },
+      "solar":    { "title": "绿色能源", "desc": "单晶硅·高效电池·组件" },
+      "battery":  { "title": "储能未来", "desc": "圆柱电池·方形电池·储能系统" }
+    },
+    "stats": {
+      "bases":    { "num": "10", "unit": "+", "label": "生产基地" },
+      "markets":  { "num": "20", "unit": "+", "label": "主要营销布局" },
+      "exports":  { "num": "60", "unit": "+", "label": "出口国家" },
+      "supply":   { "num": "20", "unit": "+", "label": "供应链遍及国家" }
+    },
+    "news": {
+      "title": "新闻中心",
+      "readmore": "阅读全文",
+      "scrollHint": "向下滑动",
+      "items": [
+        { "day": "27", "date": "2026/02", "title": "YTMagnet新增一国家级绿色工厂" },
+        { "day": "27", "date": "2026/01", "title": "YTMagnet主导的国家标准获批 4月起实施" },
+        { "day": "27", "date": "2026/01", "title": "公司概念验证中心获省级首批认定" }
+      ]
+    }
+  },
+  "pages": {
+    "about":    { "title": "走进钰彤", "sub": "磁性材料领域的全球化领军企业", "wip": "页面建设中，敬请期待..." },
+    "products": { "title": "钰彤产品", "sub": "磁性材料 · 器件 · 光伏 · 锂电",  "wip": "页面建设中，敬请期待..." },
+    "news":     { "title": "新闻中心", "sub": "企业动态 · 行业资讯 · 媒体报道", "wip": "页面建设中，敬请期待..." },
+    "investor": { "title": "投资者关系", "sub": "公司公告 · 财务报告 · 股东信息", "wip": "页面建设中，敬请期待..." },
+    "join":     { "title": "加入钰彤", "sub": "与优秀的人共同成长，共创磁铁未来",  "wip": "页面建设中，敬请期待..." },
+    "contact":  {
+      "title": "联系我们",
+      "sub": "期待与您建立长期稳定的合作关系",
+      "address": {
+        "label": "总部地址",
+        "value": "浙江省宁波市海曙区高桥镇佳园创业园"
+      },
+      "whatsapp": {
+        "label": "WhatsApp",
+        "value": "+86 131 0749 7745"
+      },
+      "email": {
+        "label": "电子邮箱",
+        "value": "yiyi@yutongglobal.com"
+      }
+    }
+  }
+}

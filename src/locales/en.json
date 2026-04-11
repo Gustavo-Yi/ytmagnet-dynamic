@@ -1,0 +1,71 @@
+{
+  "site": {
+    "name": "YT Magnet - Yutong Magnetics",
+    "description": "Professional magnetic material manufacturer offering ferrite, NdFeB, photovoltaic and lithium battery solutions."
+  },
+  "cookie": {
+    "title": "We Use Cookies",
+    "desc": "We use cookies to enhance your browsing experience, analyze site traffic, and personalize content. By clicking \"Accept All\", you consent to our use of all cookies.",
+    "acceptAll": "Accept All",
+    "essential": "Essential Only",
+    "learnMore": "Learn More"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About Us",
+    "products": "Products",
+    "news": "News",
+    "contact": "Contact",
+    "products_sub": {
+      "ferrite": "Ferrite Magnets",
+      "ndfeb": "NdFeB Magnets"
+    }
+  },
+  "home": {
+    "slides": {
+      "magnetic": { "title": "World Magnet Hub", "desc": "Ferrite · NdFeB · AlNiCo" },
+      "devices":  { "title": "Magnetic Devices",  "desc": "Transformers · Filters · Inductors" },
+      "solar":    { "title": "Green Energy",      "desc": "Monocrystalline · High-efficiency Cells · Modules" },
+      "battery":  { "title": "Energy Future",     "desc": "Cylindrical · Prismatic · Energy Storage Systems" }
+    },
+    "stats": {
+      "bases":   { "num": "10", "unit": "+", "label": "Production Bases" },
+      "markets": { "num": "20", "unit": "+", "label": "Marketing Networks" },
+      "exports": { "num": "60", "unit": "+", "label": "Export Countries" },
+      "supply":  { "num": "20", "unit": "+", "label": "Supply Chain Countries" }
+    },
+    "news": {
+      "title": "News Center",
+      "readmore": "Read More",
+      "scrollHint": "Scroll Down",
+      "items": [
+        { "day": "27", "date": "2026/02", "title": "YTMagnet Added a National-level Green Factory" },
+        { "day": "27", "date": "2026/01", "title": "National Standard Led by YTMagnet Approved, Effective April" },
+        { "day": "27", "date": "2026/01", "title": "Company Concept Verification Center Earned Provincial Recognition" }
+      ]
+    }
+  },
+  "pages": {
+    "about":    { "title": "About Us",            "sub": "A Global Leader in Magnetic Materials", "wip": "Page under construction, stay tuned..." },
+    "products": { "title": "Our Products",        "sub": "Magnetics · Devices · Solar · Battery",  "wip": "Page under construction, stay tuned..." },
+    "news":     { "title": "News Center",          "sub": "Corporate News · Industry Insights · Media Coverage", "wip": "Page under construction, stay tuned..." },
+    "investor": { "title": "Investor Relations",  "sub": "Announcements · Financial Reports · Shareholder Info", "wip": "Page under construction, stay tuned..." },
+    "join":     { "title": "Join Us",             "sub": "Grow with brilliant minds, shape the magnetic future", "wip": "Page under construction, stay tuned..." },
+    "contact":  {
+      "title": "Contact Us",
+      "sub": "We look forward to building a lasting partnership with you",
+      "address": {
+        "label": "Headquarters",
+        "value": "Jiayuan Innovation Park, Gaoqiao Town, Haishu District, Ningbo, Zhejiang, China"
+      },
+      "whatsapp": {
+        "label": "WhatsApp",
+        "value": "+86 131 0749 7745"
+      },
+      "email": {
+        "label": "Email",
+        "value": "yiyi@yutongglobal.com"
+      }
+    }
+  }
+}

@@ -1,0 +1,359 @@
+.app-root {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  background: #000;
+}
+
+/* HomePage specific swiper container */
+.app {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Clean fullscreen homepage — no UI chrome */
+.home-page {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  z-index: 2;
+}
+
+/* ── Video Background Container ── */
+.video-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.bg-video {
+  width: 102%; /* Slightly larger to prevent edge flickering */
+  height: 102%;
+  object-fit: cover;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  /* Zoom in to crop out source-encoded black bars while staying centered */
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* Tint overlay to keep text readable on top of dynamic video */
+.video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(14, 25, 38, 0.35); /* Subtle cool dark tint */
+  z-index: 1;
+}
+
+/* The full-page container that slides vertically */
+.fullpage-container {
+  width: 100%;
+  position: relative;
+  z-index: 2; /* Content above video and overlay */
+  will-change: transform;
+  transition: transform 0.85s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+/* Each slide = 100vh */
+.fp-slide {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+/* ========================
+   PRODUCT SLIDES
+   ======================== */
+.product-slide {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 100px 80px 60px;
+  position: relative;
+}
+
+.product-slide-text {
+  position: absolute;
+  left: 60px;
+  bottom: 100px;
+  z-index: 2;
+  max-width: 400px;
+}
+
+.product-slide-title {
+  font-size: 48px;
+  font-weight: 200;
+  color: white;
+  letter-spacing: 6px;
+  margin-bottom: 24px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  line-height: 1;
+}
+
+.product-slide-desc {
+  font-size: 13px;
+  color: rgba(255,255,255,0.65);
+  letter-spacing: 3px;
+  margin-bottom: 36px;
+  font-weight: 300;
+}
+
+/* Apple-style frosted glass pill button */
+.product-slide-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  /* Glassmorphism */
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1), 0 1px 0 rgba(255,255,255,0.3) inset;
+  color: white;
+  padding: 12px 30px;
+  font-size: 14px;
+  letter-spacing: 2px;
+  border-radius: 30px;
+  transition: all 0.3s;
+  font-weight: 300;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.product-slide-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12), 0 1px 0 rgba(255,255,255,0.4) inset;
+  transform: translateY(-2px);
+}
+
+/* ========================
+   STATS SLIDE
+   ======================== */
+.stats-slide {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 80px 60px;
+}
+
+.stats-list {
+  display: flex;
+  gap: 80px;
+  align-items: flex-end;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-num {
+  font-size: 80px;
+  font-weight: 200;
+  color: white;
+  line-height: 1;
+  letter-spacing: -2px;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.stat-num span {
+  font-size: 40px;
+  font-weight: 300;
+  vertical-align: top;
+  margin-top: 12px;
+  display: inline-block;
+}
+
+.stat-label {
+  font-size: 15px;
+  color: rgba(255,255,255,0.75);
+  margin-top: 16px;
+  letter-spacing: 2px;
+  font-weight: 300;
+}
+
+/* ========================
+   NEWS SLIDE
+   ======================== */
+.news-slide {
+  width: 100%;
+  height: 100%;
+  padding: 120px 80px 60px;
+  display: flex;
+  flex-direction: column;
+}
+
+.news-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 60px;
+}
+
+.news-header h2 {
+  font-size: 32px;
+  font-weight: 300;
+  color: white;
+  letter-spacing: 4px;
+}
+
+/* Glassmorphism circle button for news "more" */
+.news-more-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  /* Glass effect */
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1), 0 1px 0 rgba(255,255,255,0.3) inset;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.news-more-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.news-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+
+.news-item {
+  padding: 30px 40px 30px 0;
+  border-right: 1px solid rgba(255,255,255,0.2);
+  cursor: pointer;
+  transition: transform 0.3s;
+  display: block;
+}
+
+.news-item:last-child {
+  border-right: none;
+  padding-right: 0;
+  padding-left: 40px;
+}
+
+.news-item:nth-child(2) {
+  padding-left: 40px;
+}
+
+.news-item:hover {
+  transform: translateY(-5px);
+}
+
+.news-date-block {
+  margin-bottom: 20px;
+}
+
+.news-day {
+  display: block;
+  font-size: 48px;
+  font-weight: 200;
+  color: white;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.news-month {
+  display: block;
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+.news-title {
+  font-size: 16px;
+  color: white;
+  font-weight: 300;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
+}
+
+.news-readmore {
+  font-size: 13px;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 1px;
+}
+
+.news-item:hover .news-readmore {
+  color: rgba(255,255,255,0.9);
+}
+
+/* Bottom center dots (glassmorphism) */
+.slide-dots {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.slide-dot {
+  width: 32px;
+  height: 3px;
+  background: rgba(255,255,255,0.3);
+  border: none;
+  cursor: pointer;
+  transition: all 0.35s;
+  padding: 0;
+}
+
+.slide-dot.active {
+  background: white;
+  width: 50px;
+}
+
+/* Scroll hint */
+.scroll-hint {
+  position: fixed;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,0.5);
+  font-size: 11px;
+  letter-spacing: 2px;
+  pointer-events: none;
+}
+
+.scroll-hint-icon {
+  animation: scrollBounce 1.6s ease-in-out infinite;
+}
+
+@keyframes scrollBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}

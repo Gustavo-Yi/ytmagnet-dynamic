@@ -1,0 +1,155 @@
+/* ── Contact Page Layout ── */
+.contact-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 2;
+  /* Very light overlay — barely any tint, let the photo shine */
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.22) 100%),
+    url('/contact-bg.jpg') center center / cover no-repeat;
+  background-color: #1a1f2e;
+}
+
+/* ── Hero ── */
+.contact-hero {
+  padding: 130px 60px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.contact-hero-title {
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: 6px;
+  color: white;
+  margin: 0 0 20px;
+  line-height: 1;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.35);
+}
+
+.contact-hero-sub {
+  font-size: 20px;            /* clearly visible */
+  color: rgba(255, 255, 255, 0.88);
+  letter-spacing: 1.5px;
+  font-weight: 300;
+  margin: 0;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.3);
+}
+
+/* ── Cards Container — wider ── */
+.contact-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 1060px;          /* wider cards */
+  width: calc(100% - 80px);
+  margin: 40px auto 80px;
+}
+
+/* ── Individual Card ── */
+.contact-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 34px 28px 28px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  cursor: default;
+}
+
+.contact-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.22);
+}
+
+.contact-card:hover .contact-card-icon {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.contact-card-link {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* ── Icon Circle ── */
+.contact-card-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+
+.contact-card-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* ── Text ── */
+.contact-card-label {
+  font-size: 13px;            /* larger, more noticeable */
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.75);   /* brighter */
+  letter-spacing: 2px;
+  margin: 0 0 10px;
+}
+
+.contact-card-value {
+  font-size: 17px;            /* enlarged */
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.97);
+  line-height: 1.55;
+  margin: 0 0 12px;
+  word-break: break-word;
+}
+
+.contact-card-cta {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 1px;
+  margin-top: auto;
+  transition: color 0.2s;
+}
+
+.contact-card-link:hover .contact-card-cta {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* ── Responsive ── */
+@media (max-width: 860px) {
+  .contact-cards {
+    grid-template-columns: 1fr;
+    width: calc(100% - 48px);
+  }
+
+  .contact-hero {
+    padding: 110px 24px 36px;
+  }
+
+  .contact-hero-title {
+    font-size: 32px;
+  }
+
+  .contact-hero-sub {
+    font-size: 17px;
+  }
+}

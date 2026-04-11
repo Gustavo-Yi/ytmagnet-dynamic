@@ -1,0 +1,114 @@
+/* ── Floating Contact Bar (Right Side) ── */
+.floating-contact {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Each button — larger size: 56px */
+.fc-btn {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 14px 0 0 14px; /* Attached to right edge */
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-right: none;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.25s ease;
+  color: white;
+}
+
+.fc-btn:hover {
+  width: 62px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.fc-btn a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: white;
+  text-decoration: none;
+}
+
+/* WhatsApp — green tint on hover */
+.fc-whatsapp:hover {
+  background: rgba(37, 211, 102, 0.35);
+  border-color: rgba(37, 211, 102, 0.4);
+}
+
+/* Email — blue tint on hover */
+.fc-email:hover {
+  background: rgba(100, 160, 255, 0.3);
+  border-color: rgba(100, 160, 255, 0.4);
+}
+
+/* Scroll to top — always visible, subtle hover */
+.fc-top {
+  opacity: 1;
+}
+
+.fc-top:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* ── Tooltip: fixed height so WA and Email tooltips align ── */
+.fc-tooltip {
+  position: absolute;
+  right: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+
+  /* Fixed dimensions so both tooltips are identical size */
+  min-width: 190px;
+  height: 56px;                    /* Same height as the button */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 16px;
+
+  background: rgba(10, 18, 30, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  pointer-events: none;
+  animation: tooltipFadeIn 0.2s ease both;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+}
+
+@keyframes tooltipFadeIn {
+  from { opacity: 0; transform: translateY(-50%) translateX(6px); }
+  to   { opacity: 1; transform: translateY(-50%) translateX(0); }
+}
+
+.fc-tooltip-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 2px;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+.fc-tooltip-value {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0;
+  font-weight: 500;
+  line-height: 1;
+}
