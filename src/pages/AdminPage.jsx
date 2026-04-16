@@ -6,8 +6,16 @@ const AdminPage = () => {
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [isLightTheme, setIsLightTheme] = useState(false);
+    const [isLightTheme, setIsLightTheme] = useState(() => {
+        return localStorage.getItem('admin_theme') === 'light';
+    });
     const navigate = useNavigate();
+
+    const toggleTheme = () => {
+        const newTheme = !isLightTheme;
+        setIsLightTheme(newTheme);
+        localStorage.setItem('admin_theme', newTheme ? 'light' : 'dark');
+    };
 
     const fetchMessages = async () => {
         const token = localStorage.getItem('admin_token');
@@ -77,7 +85,7 @@ const AdminPage = () => {
                 <div className="admin-logo">YT MAGNET 管理后台</div>
                 <div className="admin-actions">
                     <button 
-                        onClick={() => setIsLightTheme(!isLightTheme)} 
+                        onClick={toggleTheme} 
                         className="admin-btn"
                         title={isLightTheme ? "切换到深色模式" : "切换到浅色模式"}
                     >
