@@ -1,0 +1,385 @@
+/* ════════════════════════════════
+   Contact Form — Apple-style Light UI
+   (Aligned to match contact-cards width: max-width 1100px)
+   ════════════════════════════════ */
+
+/* ── Form Card ── */
+.cf-form-card {
+  max-width: 1100px;
+  width: calc(100% - 80px);
+  margin: 0 auto;
+  padding: 44px 48px 48px;
+  border-radius: 18px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Title ── */
+.cf-form-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1c1c1e;
+  margin: 0 0 6px;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.cf-form-sub {
+  font-size: 13px;
+  color: #8e8e93;
+  text-align: center;
+  margin: 0 0 32px;
+  letter-spacing: 0.3px;
+}
+
+/* ── Form Layout ── */
+.cf-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.cf-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.cf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  position: relative;
+}
+
+.cf-field-full {
+  grid-column: 1 / -1;
+}
+
+/* ── Label ── */
+.cf-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #3c3c43;
+  letter-spacing: 0.2px;
+}
+
+.cf-required {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+/* ── Input / Select / Textarea ── */
+.cf-input {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.15); /* Slightly more defined when context is white */
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #1c1c1e;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+}
+
+.cf-input::placeholder {
+  color: #aeaeb2;
+}
+
+.cf-input:focus {
+  background: white;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+/* ── Custom Country Selector ── */
+.custom-country-selector {
+  position: relative;
+  width: 100%;
+}
+
+.cf-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  min-height: 48px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  padding: 0 16px;
+}
+
+.cf-dropdown-trigger.active {
+  border-color: #3b82f6;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.cf-flag-icon {
+  width: 20px;
+  height: 15px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.cf-code-text {
+  font-weight: 600;
+  color: #1c1c1e;
+  min-width: 45px;
+}
+
+.cf-name-text {
+  color: #3c3c43;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cf-dropdown-arrow {
+  font-size: 10px;
+  color: #aeaeb2;
+  transition: transform 0.2s;
+}
+
+.cf-dropdown-trigger.active .cf-dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.cf-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: 320px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  z-index: 1000;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.cf-search-box {
+  padding: 10px;
+  background: white;
+  border-bottom: 1px solid #f2f2f7;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.cf-search-input {
+  width: 100%;
+  height: 36px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 14px;
+  color: #1c1c1e;
+  outline: none;
+  transition: background 0.2s;
+}
+
+.cf-search-input:focus {
+  background: #e5e5ea;
+}
+
+.cf-options-list {
+  flex: 1;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+/* Custom Scrollbar for menu */
+.cf-options-list::-webkit-scrollbar {
+  width: 6px;
+}
+.cf-options-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.cf-options-list::-webkit-scrollbar-thumb {
+  background: #d1d1d6;
+  border-radius: 10px;
+}
+
+.cf-no-results {
+  padding: 24px;
+  text-align: center;
+  color: #8e8e93;
+  font-size: 14px;
+}
+
+.cf-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cf-dropdown-item:hover {
+  background: #f2f2f7;
+}
+
+.cf-item-name {
+  font-size: 13px;
+  color: #3c3c43;
+}
+
+/* Select */
+.cf-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23aeaeb2' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+.cf-select option {
+  background: white;
+  color: #1c1c1e;
+}
+
+/* Textarea */
+.cf-textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+}
+
+/* Char count */
+.cf-char-count {
+  font-size: 11px;
+  color: #aeaeb2;
+  text-align: right;
+  margin-top: -4px;
+}
+
+/* ── Turnstile ── */
+.cf-turnstile-wrap {
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* ── Error ── */
+.cf-error-msg {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #dc2626;
+}
+
+/* ── Submit Button ── */
+.cf-submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  background: #1c1c1e;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s, opacity 0.2s;
+  font-family: inherit;
+}
+
+.cf-submit-btn:hover:not(:disabled) {
+  background: #3a3a3c;
+  transform: translateY(-2px);
+}
+
+.cf-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Success State ── */
+.cf-success {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 60px 48px;
+}
+
+.cf-success-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #22c55e;
+}
+
+.cf-success h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1c1c1e;
+  margin: 0;
+}
+
+.cf-success p {
+  font-size: 14px;
+  color: #8e8e93;
+  line-height: 1.7;
+  margin: 0;
+  max-width: 400px;
+}
+
+.cf-btn-secondary {
+  padding: 10px 28px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+  background: transparent;
+  color: #3c3c43;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.cf-btn-secondary:hover {
+  background: #f2f2f7;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .cf-form-card {
+    width: calc(100% - 40px);
+    padding: 28px 20px;
+  }
+
+  .cf-row {
+    grid-template-columns: 1fr;
+  }
+}

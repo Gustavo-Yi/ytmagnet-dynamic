@@ -10,6 +10,8 @@ import NewsPage from './pages/NewsPage';
 import InvestorPage from './pages/InvestorPage';
 import JoinPage from './pages/JoinPage';
 import ContactPage from './pages/ContactPage';
+import AdminPage from './pages/AdminPage';
+import LoginPage from './pages/LoginPage';
 import './App.css';
 
 function App() {
@@ -28,6 +30,8 @@ function App() {
         <Route path="/investor"   element={<InvestorPage />} />
         <Route path="/join"       element={<JoinPage />} />
         <Route path="/contact"    element={<ContactPage />} />
+        <Route path="/admin"      element={<AdminPage />} />
+        <Route path="/admin/login" element={<LoginPage />} />
       </Routes>
 
       {/* Global Cookie Consent — appears on every page */}

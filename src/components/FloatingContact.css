@@ -20,10 +20,7 @@
   justify-content: center;
   cursor: pointer;
   border-radius: 14px 0 0 14px; /* Attached to right edge */
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-right: none;
   box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
   transition: all 0.25s ease;
@@ -32,7 +29,6 @@
 
 .fc-btn:hover {
   width: 62px;
-  background: rgba(255, 255, 255, 0.25);
 }
 
 .fc-btn a {
@@ -45,25 +41,32 @@
   text-decoration: none;
 }
 
-/* WhatsApp — green tint on hover */
+/* WhatsApp — vivid green */
+.fc-whatsapp {
+  background: #25d366;
+}
 .fc-whatsapp:hover {
-  background: rgba(37, 211, 102, 0.35);
-  border-color: rgba(37, 211, 102, 0.4);
+  background: #128c7e;
 }
 
-/* Email — blue tint on hover */
+/* Email — vivid blue */
+.fc-email {
+  background: #3b82f6;
+}
 .fc-email:hover {
-  background: rgba(100, 160, 255, 0.3);
-  border-color: rgba(100, 160, 255, 0.4);
+  background: #2563eb;
 }
 
-/* Scroll to top — always visible, subtle hover */
+/* Scroll to top — solid white with dark arrow */
 .fc-top {
-  opacity: 1;
+  background: #ffffff;
+  color: #1c1c1e;
 }
-
 .fc-top:hover {
-  background: rgba(255, 255, 255, 0.28);
+  background: #f2f2f7;
+}
+.fc-top svg {
+  color: #1c1c1e;
 }
 
 /* ── Tooltip: fixed height so WA and Email tooltips align ── */

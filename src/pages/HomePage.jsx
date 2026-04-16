@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import usePageTitle from '../hooks/usePageTitle';
 import { useLanguage } from '../context/LanguageContext';
 import '../App.css';
@@ -6,6 +6,12 @@ import '../App.css';
 function HomePage() {
   usePageTitle('');
   const { t } = useLanguage();
+
+  // Lock scroll on homepage (full-screen experience), restore when leaving
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
 
   return (
     <div className="home-page">

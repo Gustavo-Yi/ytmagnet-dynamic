@@ -15,10 +15,14 @@
   user-select: none;
 }
 
-/* Sub-pages: purely transparent — same as homepage */
+/* Sub-pages: absolute overlay on hero image — transparent nav sits ON TOP of background image,
+   and scrolls away with the page (unlike fixed which stays, unlike relative which pushes content) */
 .header-subpage {
+  position: absolute;  /* overlays hero, scrolls with page */
   background: transparent;
+  z-index: 100;
 }
+
 
 .header-logo {
   margin-right: auto;

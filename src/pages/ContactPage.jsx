@@ -1,14 +1,17 @@
 import React from 'react';
 import usePageTitle from '../hooks/usePageTitle';
 import { useLanguage } from '../context/LanguageContext';
+import ContactForm from '../components/ContactForm';
 import './ContactPage.css';
 
 const WHATSAPP_NUMBER = '8613107497745';
 const EMAIL = 'yiyi@yutongglobal.com';
 
 function ContactPage() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   usePageTitle(t('pages.contact.title'));
+
+  const isZh = lang === 'zh';
 
   const cards = [
     {
@@ -21,8 +24,8 @@ function ContactPage() {
       ),
       label: t('pages.contact.address.label'),
       value: t('pages.contact.address.value'),
-      href: null,
-      accent: 'rgba(255, 60, 60, 0.7)',   /* Red for location pin */
+      href: '#our-location', // Scrolling to map section
+      accentColor: '#ef4444',
     },
     {
       key: 'whatsapp',
@@ -34,7 +37,7 @@ function ContactPage() {
       label: t('pages.contact.whatsapp.label'),
       value: t('pages.contact.whatsapp.value'),
       href: `https://wa.me/${WHATSAPP_NUMBER}`,
-      accent: 'rgba(37, 211, 102, 0.6)',
+      accentColor: '#25d366',
     },
     {
       key: 'email',
@@ -47,53 +50,98 @@ function ContactPage() {
       label: t('pages.contact.email.label'),
       value: t('pages.contact.email.value'),
       href: `mailto:${EMAIL}`,
-      accent: 'rgba(120, 160, 255, 0.6)',
+      accentColor: '#3b82f6',
     },
   ];
 
   return (
     <div className="contact-page">
-      {/* Hero Section */}
-      <div className="contact-hero">
-        <h1 className="contact-hero-title">{t('pages.contact.title')}</h1>
-        <p className="contact-hero-sub">{t('pages.contact.sub')}</p>
-      </div>
 
-      {/* Three Contact Cards */}
-      <div className="contact-cards">
-        {cards.map((card) => {
-          const inner = (
-            <>
-              <div className="contact-card-icon" style={{ '--accent': card.accent }}>
-                {card.icon}
+      {/* ── Hero Section (background image) ── */}
+      <section className="contact-hero">
+        <img 
+          src="https://mag.yutongglobal.com/%E9%93%81%E6%B0%A7%E4%BD%93%E8%83%8C%E6%99%AF%E5%9B%BE.jpg?v=2" 
+          alt="Background" 
+          className="contact-hero-bg"
+        />
+        <div className="contact-hero-overlay"></div>
+        <div className="contact-hero-content">
+          <h1 className="contact-hero-title">{t('pages.contact.title')}</h1>
+          <p className="contact-hero-sub">{t('pages.contact.sub')}</p>
+        </div>
+      </section>
+
+      {/* ── Three Info Cards (overlap hero bottom) ── */}
+      <div className="contact-cards-wrap">
+        <div className="contact-cards">
+          {cards.map((card) => {
+            const inner = (
+              <>
+                <div className="cc-icon" style={{ '--accent': card.accentColor }}>
+                  {card.icon}
+                </div>
+                <p className="cc-label">{card.label}</p>
+                <p className="cc-value">{card.value}</p>
+                {card.href && (
+                  <span className="cc-cta">
+                    {card.key === 'address' ? (isZh ? '→ 查看地图' : '→ View Map') : 
+                     card.key === 'whatsapp' ? (isZh ? '→ 立即沟通' : '→ Chat Now') : 
+                     (isZh ? '→ 发送邮件' : '→ Send Email')}
+                  </span>
+                )}
+              </>
+            );
+
+            return card.href ? (
+              <a
+                key={card.key}
+                href={card.href}
+                target={card.key === 'whatsapp' ? '_blank' : undefined}
+                rel="noopener noreferrer"
+                className="contact-card contact-card-link"
+              >
+                {inner}
+              </a>
+            ) : (
+              <div key={card.key} className="contact-card">
+                {inner}
               </div>
-              <p className="contact-card-label">{card.label}</p>
-              <p className="contact-card-value">{card.value}</p>
-              {card.href && (
-                <span className="contact-card-cta">
-                  {card.key === 'whatsapp' ? '→ Chat Now' : '→ Send Email'}
-                </span>
-              )}
-            </>
-          );
-
-          return card.href ? (
-            <a
-              key={card.key}
-              href={card.href}
-              target={card.key === 'whatsapp' ? '_blank' : undefined}
-              rel="noopener noreferrer"
-              className="contact-card contact-card-link"
-            >
-              {inner}
-            </a>
-          ) : (
-            <div key={card.key} className="contact-card">
-              {inner}
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
+
+      {/* ── Form Section (light background) ── */}
+      <section className="contact-form-section">
+        <ContactForm />
+      </section>
+
+      {/* ── Map Section ── */}
+      <section id="our-location" className="contact-map-section">
+        <div className="map-title-wrap">
+          <div className="map-title-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+          <h2 className="map-title">{isZh ? '公司位置' : 'Our Location'}</h2>
+        </div>
+        
+        <div className="map-container">
+          <iframe
+            title="Google Map"
+            src={`https://maps.google.com/maps?q=${encodeURIComponent('浙江省宁波市海曙区高桥镇佳园创业园A11')}&t=&z=11&ie=UTF8&iwloc=B&output=embed`}
+            width="100%"
+            height="450"
+            style={{ border: 0 }}
+            allowFullScreen=""
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          ></iframe>
+        </div>
+      </section>
+
     </div>
   );
 }

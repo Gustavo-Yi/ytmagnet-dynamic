@@ -1,0 +1,234 @@
+/* Admin CSS - Premium Dark Theme */
+:root {
+    --admin-bg: #0f1115;
+    --admin-card-bg: #1a1d23;
+    --admin-primary: #3b82f6;
+    --admin-primary-hover: #2563eb;
+    --admin-text: #e2e8f0;
+    --admin-text-muted: #94a3b8;
+    --admin-border: #2d333b;
+    --admin-danger: #ef4444;
+}
+
+/* Login Page */
+.admin-login-container {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--admin-bg);
+}
+
+.login-card {
+    background: var(--admin-card-bg);
+    padding: 3rem;
+    border-radius: 1rem;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--admin-border);
+}
+
+.login-card h2 {
+    color: white;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    font-size: 1.75rem;
+}
+
+.login-card .subtitle {
+    color: var(--admin-text-muted);
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    color: var(--admin-text);
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    background: #0a0c10;
+    border: 1px solid var(--admin-border);
+    border-radius: 0.5rem;
+    color: white;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--admin-primary);
+}
+
+.login-card button {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--admin-primary);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.login-card button:hover {
+    background: var(--admin-primary-hover);
+}
+
+.error-message {
+    color: var(--admin-danger);
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+/* Dashboard */
+.admin-dashboard {
+    background: var(--admin-bg);
+    min-height: 100vh;
+    color: var(--admin-text);
+}
+
+.admin-header {
+    background: var(--admin-card-bg);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-logo {
+    font-weight: 700;
+    font-size: 1.25rem;
+    letter-spacing: 1px;
+}
+
+.admin-user-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.logout-btn {
+    background: transparent;
+    border: 1px solid var(--admin-border);
+    color: var(--admin-text-muted);
+    padding: 0.4rem 1rem;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.logout-btn:hover {
+    border-color: var(--admin-danger);
+    color: var(--admin-danger);
+}
+
+.admin-main {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.section-header h2 {
+    font-size: 1.5rem;
+}
+
+.section-header .count {
+    color: var(--admin-text-muted);
+    background: #2d333b;
+    padding: 0.2rem 0.8rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+}
+
+.table-container {
+    background: var(--admin-card-bg);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    border: 1px solid var(--admin-border);
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.admin-table th {
+    background: #23272e;
+    padding: 1rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: var(--admin-text-muted);
+    font-weight: 600;
+}
+
+.admin-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--admin-border);
+    font-size: 0.9rem;
+}
+
+.time-td {
+    color: var(--admin-text-muted);
+    white-space: nowrap;
+}
+
+.message-td {
+    max-width: 300px;
+    line-height: 1.5;
+}
+
+.ip-td {
+    font-family: monospace;
+    color: var(--admin-text-muted);
+}
+
+.delete-btn {
+    background: transparent;
+    color: var(--admin-danger);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.delete-btn:hover {
+    background: var(--admin-danger);
+    color: white;
+}
+
+.no-data {
+    text-align: center;
+    padding: 3rem !important;
+    color: var(--admin-text-muted);
+}
+
+.admin-loading {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--admin-bg);
+    color: var(--admin-text);
+}

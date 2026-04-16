@@ -1,150 +1,242 @@
-/* ── Contact Page Layout ── */
+/* ════════════════════════════════
+   CONTACT PAGE — Full Layout
+   ════════════════════════════════ */
+
+/* -- Page wrapper -- */
 .contact-page {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  z-index: 2;
-  background:
-    linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.08) 100%),
-    url('https://mag.yutongglobal.com/%E9%93%81%E6%B0%A7%E4%BD%93%E8%83%8C%E6%99%AF%E5%9B%BE.jpg?v=2') center center / cover no-repeat;
-  background-color: #1a1f2e;
-  /* Sharpen rendering: boost contrast + slightly reduce blur perception */
-  filter: contrast(1.08) brightness(1.05);
-  image-rendering: optimizeQuality;
+  background: #f2f2f7;  /* Apple-style light grey */
 }
 
-/* ── Hero ── */
+/* ── HERO SECTION ─────────────────── */
 .contact-hero {
-  padding: 130px 60px 48px;
+  position: relative;
+  width: 100%;
+  height: 560px;         /* Increased to ~4/5 height */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+}
+
+.contact-hero-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%; /* Prioritize showing the magnets from the upper part */
+  display: block;
+}
+
+.contact-hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1;
+}
+
+.contact-hero-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
+  justify-content: center;
+  padding-top: 40px; /* offset for header */
 }
 
 .contact-hero-title {
-  font-size: 42px;
+  font-size: 52px;
   font-weight: 700;
-  letter-spacing: 6px;
+  letter-spacing: 8px;
   color: white;
-  margin: 0 0 20px;
-  line-height: 1;
-  text-shadow: 0 2px 16px rgba(0,0,0,0.35);
+  margin: 0 0 18px;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+  text-align: center;
 }
 
 .contact-hero-sub {
-  font-size: 20px;            /* clearly visible */
-  color: rgba(255, 255, 255, 0.88);
-  letter-spacing: 1.5px;
-  font-weight: 300;
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 2px;
   margin: 0;
-  text-shadow: 0 1px 8px rgba(0,0,0,0.3);
+  text-align: center;
 }
 
-/* ── Cards Container — wider ── */
+/* ── CARDS SECTION ────────────────── */
+.contact-cards-wrap {
+  position: relative;
+  z-index: 10;
+  background: #fff;
+  display: flow-root;   /* Prevents margin collapsing so white bg doesn't move up with cards */
+}
+
 .contact-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  max-width: 1060px;          /* wider cards */
+  gap: 24px;
+  max-width: 1100px;
   width: calc(100% - 80px);
-  margin: 40px auto 80px;
+  margin: -110px auto 0;    /* EXACTLY 50% overlap for 220px cards */
+  padding-bottom: 30px;
 }
 
 /* ── Individual Card ── */
 .contact-card {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center;    /* Essential for centering icons/text */
   text-align: center;
-  padding: 34px 28px 28px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(20px) saturate(150%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
-  cursor: default;
+  background: white;
+  padding: 32px 24px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); 
+  height: 220px;
+  justify-content: center; /* Back to perfect centering */
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  box-sizing: border-box;
 }
 
 .contact-card:hover {
   transform: translateY(-5px);
-  background: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.22);
-}
-
-.contact-card:hover .contact-card-icon {
-  background: color-mix(in srgb, var(--accent) 22%, transparent);
-  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
-  box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.08),
+    0 20px 48px rgba(0, 0, 0, 0.1);
 }
 
 .contact-card-link {
-  text-decoration: none;
   cursor: pointer;
 }
 
-/* ── Icon Circle ── */
-.contact-card-icon {
-  width: 54px;
-  height: 54px;
+/* ── Card Icon ── */
+.cc-icon {
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+  margin-bottom: 20px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent);
+  flex-shrink: 0;
 }
 
-.contact-card-icon svg {
+.cc-icon svg {
   width: 24px;
   height: 24px;
 }
 
-/* ── Text ── */
-.contact-card-label {
-  font-size: 13px;            /* larger, more noticeable */
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.75);   /* brighter */
-  letter-spacing: 2px;
-  margin: 0 0 10px;
+.contact-card:hover .cc-icon {
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
-.contact-card-value {
-  font-size: 17px;            /* enlarged */
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.97);
-  line-height: 1.55;
-  margin: 0 0 12px;
-  word-break: break-word;
-}
-
-.contact-card-cta {
+/* Card text */
+.cc-label {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.45);
+  font-weight: 500;
+  color: #8e8e93;
   letter-spacing: 1px;
-  margin-top: auto;
+  margin: 0 0 8px;
+}
+
+.cc-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1c1c1e;
+  line-height: 1.4;
+  margin: 0 0 10px;
+  /* Allow word wrap to prevent card deformation in English */
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.cc-cta {
+  font-size: 13px;
+  font-weight: 500;
+  color: #3b82f6;      /* Blue like automotive style */
+  letter-spacing: 0.5px;
+  margin-top: 12px;
   transition: color 0.2s;
 }
 
-.contact-card-link:hover .contact-card-cta {
-  color: rgba(255, 255, 255, 0.8);
+.contact-card-link:hover .cc-cta {
+  color: #3b82f6;
+}
+
+/* ── FORM SECTION ─────────────────── */
+.contact-form-section {
+  background: #fff;
+  padding: 0 0 20px;
+}
+
+/* ── MAP SECTION ──────────────────── */
+.contact-map-section {
+  padding: 20px 20px 80px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.map-title-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.map-title-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.map-title-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.map-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1c1c1e;
+  margin: 0;
+}
+
+.map-container {
+  width: 100%;
+  max-width: 1100px;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: #f2f2f7;
+}
+
+.map-container iframe {
+  display: block;
 }
 
 /* ── Responsive ── */
 @media (max-width: 860px) {
-  .contact-cards {
-    grid-template-columns: 1fr;
-    width: calc(100% - 48px);
-  }
-
   .contact-hero {
-    padding: 110px 24px 36px;
+    height: 300px;
+    padding-top: 80px;
   }
 
   .contact-hero-title {
@@ -152,6 +244,16 @@
   }
 
   .contact-hero-sub {
-    font-size: 17px;
+    font-size: 15px;
+  }
+
+  .contact-cards {
+    grid-template-columns: 1fr;
+    width: calc(100% - 40px);
+    margin-top: -40px;
+  }
+
+  .cc-value {
+    white-space: normal; /* allow wrap on mobile */
   }
 }
