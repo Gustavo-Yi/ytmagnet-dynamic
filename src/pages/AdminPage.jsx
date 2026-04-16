@@ -75,16 +75,18 @@ const AdminPage = () => {
         <div className={`admin-dashboard ${isLightTheme ? 'light-theme' : ''}`}>
             <header className="admin-header">
                 <div className="admin-logo">YT MAGNET 管理后台</div>
-                <div className="admin-user-info">
+                <div className="admin-actions">
                     <button 
                         onClick={() => setIsLightTheme(!isLightTheme)} 
-                        className="theme-toggle-btn"
+                        className="admin-btn"
                         title={isLightTheme ? "切换到深色模式" : "切换到浅色模式"}
                     >
                         {isLightTheme ? '🌙' : '☀️'} {isLightTheme ? '深色模式' : '浅色模式'}
                     </button>
-                    <span>欢迎您，易亿</span>
-                    <button onClick={handleLogout} className="logout-btn">退出登录</button>
+                    <div className="user-profile">
+                        <span className="welcome-text">欢迎您，<strong>易亿</strong></span>
+                        <button onClick={handleLogout} className="admin-btn logout">退出登录</button>
+                    </div>
                 </div>
             </header>
 

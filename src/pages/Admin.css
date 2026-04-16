@@ -119,7 +119,7 @@
 
 .admin-header {
     background: var(--admin-header-bg);
-    padding: 1.25rem 2.5rem;
+    padding: 1rem 3rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -129,25 +129,54 @@
     z-index: 100;
 }
 
-.theme-toggle-btn {
+.admin-logo {
+    font-weight: 800;
+    font-size: 1.5rem;
+    letter-spacing: -0.5px;
+    color: var(--admin-text);
+}
+
+.admin-actions {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.welcome-text {
+    font-size: 0.95rem;
+    color: var(--admin-text-muted);
+}
+
+.admin-btn {
     background: var(--admin-count-bg);
     border: 1px solid var(--admin-border);
     color: var(--admin-text);
-    padding: 0.5rem 1rem;
-    border-radius: 2rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 10px;
     cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 500;
+    font-size: 0.875rem;
+    font-weight: 600;
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.25s ease;
+    white-space: nowrap;
 }
 
-.theme-toggle-btn:hover {
+.admin-btn:hover {
+    border-color: var(--admin-primary);
     background: var(--admin-border);
-    transform: translateY(-1px);
-    box-shadow: var(--admin-shadow);
+}
+
+.admin-btn.logout:hover {
+    border-color: var(--admin-danger);
+    color: var(--admin-danger);
 }
 
 .admin-main {
