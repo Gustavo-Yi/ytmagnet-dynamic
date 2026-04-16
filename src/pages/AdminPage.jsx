@@ -6,6 +6,7 @@ const AdminPage = () => {
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [isLightTheme, setIsLightTheme] = useState(false);
     const navigate = useNavigate();
 
     const fetchMessages = async () => {
@@ -68,13 +69,20 @@ const AdminPage = () => {
         fetchMessages();
     }, []);
 
-    if (loading) return <div className="admin-loading">正在加载数据...</div>;
+    if (loading) return <div className={`admin-loading ${isLightTheme ? 'light-theme' : ''}`}>正在加载数据...</div>;
 
     return (
-        <div className="admin-dashboard">
+        <div className={`admin-dashboard ${isLightTheme ? 'light-theme' : ''}`}>
             <header className="admin-header">
                 <div className="admin-logo">YT MAGNET 管理后台</div>
                 <div className="admin-user-info">
+                    <button 
+                        onClick={() => setIsLightTheme(!isLightTheme)} 
+                        className="theme-toggle-btn"
+                        title={isLightTheme ? "切换到深色模式" : "切换到浅色模式"}
+                    >
+                        {isLightTheme ? '🌙' : '☀️'} {isLightTheme ? '深色模式' : '浅色模式'}
+                    </button>
                     <span>欢迎您，易亿</span>
                     <button onClick={handleLogout} className="logout-btn">退出登录</button>
                 </div>

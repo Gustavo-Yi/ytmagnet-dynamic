@@ -10,6 +10,19 @@
     --admin-danger: #ef4444;
 }
 
+/* Light Theme Variables */
+.admin-dashboard.light-theme,
+.admin-loading.light-theme {
+    --admin-bg: #f8fafc;
+    --admin-card-bg: #ffffff;
+    --admin-text: #1e293b;
+    --admin-text-muted: #64748b;
+    --admin-border: #e2e8f0;
+    --admin-primary: #3b82f6;
+    --admin-primary-hover: #2563eb;
+    --admin-table-header: #f1f5f9;
+}
+
 /* Login Page */
 .admin-login-container {
     height: 100vh;
