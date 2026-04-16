@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import CookieConsent from './components/CookieConsent';
 import FloatingContact from './components/FloatingContact';
@@ -15,10 +15,13 @@ import LoginPage from './pages/LoginPage';
 import './App.css';
 
 function App() {
+  const location = useLocation();
+  const isAdminPage = location.pathname.startsWith('/admin');
+
   return (
     <div className="app-root">
-      {/* Global Header - always visible */}
-      <Header />
+      {/* Global Header - hidden on admin pages */}
+      {!isAdminPage && <Header />}
 
       {/* Page Routes */}
       <Routes>
@@ -34,11 +37,11 @@ function App() {
         <Route path="/admin/login" element={<LoginPage />} />
       </Routes>
 
-      {/* Global Cookie Consent — appears on every page */}
-      <CookieConsent />
+      {/* Global Cookie Consent — hidden on admin pages */}
+      {!isAdminPage && <CookieConsent />}
 
-      {/* Right-side floating contact buttons */}
-      <FloatingContact />
+      {/* Right-side floating contact buttons — hidden on admin pages */}
+      {!isAdminPage && <FloatingContact />}
     </div>
   );
 }

@@ -21,8 +21,22 @@ const LoginPage = () => {
                 body: JSON.stringify({ username, password }),
             });
 
-            const data = await response.json();
+            if (!response.ok) {
+                const text = await response.text();
+                let msg = '服务器连接错误';
+                try {
+                    const data = JSON.parse(text);
+                    msg = data.message || msg;
+                } catch {
+                    // Not JSON, might be a 404 or 500 error page
+                    if (response.status === 404) msg = 'API 接口未找到 (404)';
+                    else if (response.status === 500) msg = '服务器内部错误 (500)';
+                }
+                setError(msg);
+                return;
+            }
 
+            const data = await response.json();
             if (data.success) {
                 localStorage.setItem('admin_token', data.token);
                 navigate('/admin');
@@ -30,7 +44,7 @@ const LoginPage = () => {
                 setError(data.message || '登录失败');
             }
         } catch (err) {
-            setError('服务器连接错误');
+            setError('网络请求失败，请检查网络或部署状态');
         } finally {
             setLoading(false);
         }
