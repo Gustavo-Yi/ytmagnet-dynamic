@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import ProductsPage from './pages/ProductsPage';
 import NewsPage from './pages/NewsPage';
+import NewsDetailPage from './pages/NewsDetailPage';
 import InvestorPage from './pages/InvestorPage';
 import JoinPage from './pages/JoinPage';
 import ContactPage from './pages/ContactPage';
@@ -30,6 +31,7 @@ function App() {
         <Route path="/products"   element={<ProductsPage />} />
         <Route path="/products/:category" element={<ProductsPage />} />
         <Route path="/news"       element={<NewsPage />} />
+        <Route path="/news/:slug" element={<NewsDetailPage />} />
         <Route path="/investor"   element={<InvestorPage />} />
         <Route path="/join"       element={<JoinPage />} />
         <Route path="/contact"    element={<ContactPage />} />

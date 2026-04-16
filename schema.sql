@@ -22,3 +22,23 @@ CREATE TABLE rate_limits (
     count INTEGER DEFAULT 0,
     window_start INTEGER    -- 时间窗口起始点
 );
+
+-- 创建新闻表 (用于新闻中心)
+CREATE TABLE IF NOT EXISTS news (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,                -- 标题
+    slug TEXT UNIQUE NOT NULL,          -- SEO 友好路径 (URL)
+    excerpt TEXT,                       -- 摘要
+    content TEXT,                       -- 正文内容 (HTML)
+    cover_image TEXT,                   -- R2 封面图片 URL
+    author TEXT DEFAULT '易亿',         -- 作者
+    category TEXT DEFAULT '行业资讯',   -- 分类
+    status TEXT DEFAULT 'published',    -- 状态 (published/draft)
+    meta_keywords TEXT,                 -- SEO 关键词
+    meta_description TEXT,              -- SEO 描述
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 创建索引以加速路径查找
+CREATE INDEX IF NOT EXISTS idx_news_slug ON news(slug);
