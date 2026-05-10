@@ -71,6 +71,7 @@ export function LanguageProvider({ children }) {
 }
 
 // Easy hook: const { t, lang, setLang } = useLanguage();
+// eslint-disable-next-line react-refresh/only-export-components
 export function useLanguage() {
   const ctx = useContext(LanguageContext);
   if (!ctx) throw new Error('useLanguage must be used inside <LanguageProvider>');

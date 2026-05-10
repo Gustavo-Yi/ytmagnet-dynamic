@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import usePageTitle from '../hooks/usePageTitle';
 import { useLanguage } from '../context/LanguageContext';
 import '../App.css';
@@ -6,6 +6,7 @@ import '../App.css';
 function HomePage() {
   usePageTitle('');
   const { t } = useLanguage();
+  const [videoFailed, setVideoFailed] = useState(false);
 
   // Lock scroll on homepage (full-screen experience), restore when leaving
   useEffect(() => {
@@ -17,9 +18,16 @@ function HomePage() {
     <div className="home-page">
       {/* Video Background — homepage only */}
       <div className="video-background">
-        <video autoPlay muted loop playsInline className="bg-video">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className={`bg-video${videoFailed ? ' is-hidden' : ''}`}
+          onError={() => setVideoFailed(true)}
+        >
           <source
-            src="https://mag.yutongglobal.com/%E7%BD%91%E7%AB%99%E8%83%8C%E6%99%AF%E6%9C%80%E7%BB%88%E7%89%88.mp4"
+            src="https://mag.yutongglobal.com/%E7%A3%81%E9%93%81%E7%BD%91%E7%AB%99%E4%B8%BB%E9%A1%B5%E8%83%8C%E6%99%AF%E8%A7%86%E9%A2%91.mp4"
             type="video/mp4"
           />
         </video>
@@ -34,7 +42,7 @@ function HomePage() {
             <circle cx="10" cy="9" r="3" fill="rgba(255,255,255,0.7)"/>
           </svg>
         </div>
-        <span>{t('home.news.scrollHint')}</span>
+        <span>{t('home.scrollHint')}</span>
       </div>
     </div>
   );

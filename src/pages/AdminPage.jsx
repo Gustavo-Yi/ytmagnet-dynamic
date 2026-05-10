@@ -1,62 +1,151 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AdminNewsEditor from './AdminNewsEditor';
+import usePageTitle from '../hooks/usePageTitle';
 import './Admin.css';
 
-const AdminPage = () => {
-    const [messages, setMessages] = useState([]);
-    const [newsList, setNewsList] = useState([]);
-    const [activeTab, setActiveTab] = useState('messages'); // 'messages' or 'news'
-    const [isEditingNews, setIsEditingNews] = useState(false);
-    const [currentNewsId, setCurrentNewsId] = useState(null);
-    
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [isLightTheme, setIsLightTheme] = useState(() => {
-        return localStorage.getItem('admin_theme') === 'light';
-    });
-    const navigate = useNavigate();
+const COUNTRY_META = {
+    '+1': { name: '美国', flagCode: 'us' },
+    '+33': { name: '法国', flagCode: 'fr' },
+    '+34': { name: '西班牙', flagCode: 'es' },
+    '+39': { name: '意大利', flagCode: 'it' },
+    '+44': { name: '英国', flagCode: 'gb' },
+    '+49': { name: '德国', flagCode: 'de' },
+    '+61': { name: '澳大利亚', flagCode: 'au' },
+    '+81': { name: '日本', flagCode: 'jp' },
+    '+82': { name: '韩国', flagCode: 'kr' },
+    '+86': { name: '中国', flagCode: 'cn' },
+    '+91': { name: '印度', flagCode: 'in' },
+};
 
-    const toggleTheme = () => {
-        const newTheme = !isLightTheme;
-        setIsLightTheme(newTheme);
-        localStorage.setItem('admin_theme', newTheme ? 'light' : 'dark');
+const PAGE_SIZE = 10;
+
+const Icon = ({ name }) => {
+    const icons = {
+        menu: <path d="M4 7h16M4 12h16M4 17h16" />,
+        message: <path d="M5 6.5h14v9H9l-4 3v-12Z" />,
+        document: <path d="M8 3.5h6l4 4V20H8V3.5Zm6 0v4h4M10.5 11h5M10.5 14h5M10.5 17h3" />,
+        search: <path d="m20 20-4.2-4.2M18 10.5A7.5 7.5 0 1 1 3 10.5a7.5 7.5 0 0 1 15 0Z" />,
+        reset: <path d="M4 12a8 8 0 1 0 2.34-5.66M4 4v5h5" />,
+        filter: <path d="M4 5h16l-6 7v5l-4 2v-7L4 5Z" />,
+        trash: <path d="M5 7h14M10 11v5M14 11v5M8 7l1-3h6l1 3M7 7l1 13h8l1-13" />,
+        chevron: <path d="m8 10 4 4 4-4" />,
+        collapse: <path d="m15 6-6 6 6 6M20 6l-6 6 6 6" />,
+        close: <path d="M6 6l12 12M18 6 6 18" />,
     };
 
-    const fetchMessages = async () => {
+    return (
+        <svg className="admin-icon" viewBox="0 0 24 24" aria-hidden="true">
+            {icons[name]}
+        </svg>
+    );
+};
+
+const getCountryMeta = (code) => COUNTRY_META[code] || { name: '其他', flagCode: '' };
+
+const formatDateParts = (value) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return { date: '-', time: '-' };
+
+    return {
+        date: date.toLocaleDateString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+        }).replaceAll('/', '/'),
+        time: date.toLocaleTimeString('zh-CN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+        }),
+    };
+};
+
+const isSameDay = (value, date = new Date()) => {
+    const target = new Date(value);
+    return target.getFullYear() === date.getFullYear()
+        && target.getMonth() === date.getMonth()
+        && target.getDate() === date.getDate();
+};
+
+const AdminPage = () => {
+    usePageTitle('Admin Dashboard');
+    const [messages, setMessages] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState('');
+    const [country, setCountry] = useState('all');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [detailMessage, setDetailMessage] = useState(null);
+    const navigate = useNavigate();
+
+    const fetchMessages = useCallback(async () => {
         const token = localStorage.getItem('admin_token');
         try {
             const response = await fetch('/api/admin/messages', {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` },
             });
             const data = await response.json();
             if (data.success) setMessages(data.data);
-        } catch (err) { console.error(err); }
-    };
+        } catch (err) {
+            console.error(err);
+        }
+    }, []);
 
-    const fetchNews = async () => {
+    const fetchData = useCallback(async () => {
         const token = localStorage.getItem('admin_token');
-        try {
-            const response = await fetch('/api/admin/news', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await response.json();
-            if (data.success) setNewsList(data.data);
-        } catch (err) { console.error(err); }
-    };
+        if (!token) {
+            navigate('/admin/login');
+            return;
+        }
 
-    const fetchData = async () => {
-        const token = localStorage.getItem('admin_token');
-        if (!token) { navigate('/admin/login'); return; }
-        
-        setLoading(true);
-        await Promise.all([fetchMessages(), fetchNews()]);
+        await fetchMessages();
         setLoading(false);
-    };
+    }, [fetchMessages, navigate]);
 
     useEffect(() => {
-        fetchData();
-    }, []);
+        const token = localStorage.getItem('admin_token');
+        if (!token) {
+            navigate('/admin/login');
+            return;
+        }
+
+        let isMounted = true;
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        fetchMessages().finally(() => {
+            if (isMounted) setLoading(false);
+        });
+
+        return () => {
+            isMounted = false;
+        };
+    }, [fetchMessages, navigate]);
+
+    const filteredMessages = useMemo(() => {
+        const keyword = search.trim().toLowerCase();
+        return messages.filter((msg) => {
+            const meta = getCountryMeta(msg.country_code);
+            const created = new Date(msg.created_at);
+            const haystack = [
+                msg.name,
+                msg.email,
+                msg.whatsapp,
+                msg.message,
+                meta.name,
+                msg.country_code,
+            ].filter(Boolean).join(' ').toLowerCase();
+            const matchesSearch = !keyword || haystack.includes(keyword);
+            const matchesCountry = country === 'all' || msg.country_code === country;
+            const matchesStart = !startDate || created >= new Date(`${startDate}T00:00:00`);
+            const matchesEnd = !endDate || created <= new Date(`${endDate}T23:59:59`);
+            return matchesSearch && matchesCountry && matchesStart && matchesEnd;
+        });
+    }, [country, endDate, messages, search, startDate]);
+
+    const totalPages = Math.max(1, Math.ceil(filteredMessages.length / PAGE_SIZE));
+    const safeCurrentPage = Math.min(currentPage, totalPages);
+    const visibleMessages = filteredMessages.slice((safeCurrentPage - 1) * PAGE_SIZE, safeCurrentPage * PAGE_SIZE);
+    const todayCount = messages.filter((msg) => isSameDay(msg.created_at)).length;
 
     const handleDeleteMessage = async (id) => {
         if (!window.confirm('确定要删除这条留言吗？')) return;
@@ -64,24 +153,16 @@ const AdminPage = () => {
         try {
             const response = await fetch(`/api/admin/messages?id=${id}`, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` },
             });
             const data = await response.json();
-            if (data.success) fetchData();
-        } catch (err) { alert('服务器错误'); }
-    };
-
-    const handleDeleteNews = async (id) => {
-        if (!window.confirm('确定要彻底删除这篇文章吗？')) return;
-        const token = localStorage.getItem('admin_token');
-        try {
-            const response = await fetch(`/api/admin/news?id=${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await response.json();
-            if (data.success) fetchData();
-        } catch (err) { alert('服务器错误'); }
+            if (data.success) {
+                setDetailMessage(null);
+                fetchData();
+            }
+        } catch {
+            alert('服务器错误');
+        }
     };
 
     const handleLogout = () => {
@@ -89,121 +170,278 @@ const AdminPage = () => {
         navigate('/admin/login');
     };
 
-    if (loading) return <div className={`admin-loading ${isLightTheme ? 'light-theme' : ''}`}>正在加载后台系统...</div>;
+    const resetFilters = () => {
+        setSearch('');
+        setCountry('all');
+        setStartDate('');
+        setEndDate('');
+        setCurrentPage(1);
+    };
+
+    if (loading) {
+        return <div className="admin-loading light-theme">正在加载后台系统...</div>;
+    }
 
     return (
-        <div className={`admin-dashboard ${isLightTheme ? 'light-theme' : ''}`}>
-            <header className="admin-header">
-                <div className="admin-logo">YT MAGNET 管理后台</div>
-                <div className="admin-actions">
-                    <button onClick={toggleTheme} className="admin-btn">
-                        {isLightTheme ? '🌙 深色模式' : '☀️ 浅色模式'}
-                    </button>
-                    <div className="user-profile">
-                        <span className="welcome-text">欢迎您，<strong>易亿</strong></span>
-                        <button onClick={handleLogout} className="admin-btn logout">退出登录</button>
+        <div className="admin-shell">
+            <aside className="admin-sidebar">
+                <div className="sidebar-brand">
+                    <img src="/logo.png" alt="YT MAGNET" className="sidebar-logo-img" />
+                    <div>
+                        <strong>YT MAGNET</strong>
+                        <span>管理后台</span>
                     </div>
                 </div>
-            </header>
 
-            <main className="admin-main">
-                <nav className="admin-tabs">
-                    <button 
-                        className={`tab-btn ${activeTab === 'messages' ? 'active' : ''}`}
-                        onClick={() => { setActiveTab('messages'); setIsEditingNews(false); }}
-                    >
-                        📩 留言管理
+                <nav className="sidebar-nav">
+                    <button className="sidebar-link">
+                        <Icon name="message" />
+                        <span>首页</span>
                     </button>
-                    <button 
-                        className={`tab-btn ${activeTab === 'news' ? 'active' : ''}`}
-                        onClick={() => { setActiveTab('news'); setIsEditingNews(false); }}
-                    >
-                        📰 新闻发布
+                    <button className="sidebar-link active">
+                        <Icon name="message" />
+                        <span>留言管理</span>
                     </button>
                 </nav>
 
-                {activeTab === 'messages' && (
-                    <section className="admin-section">
-                        <div className="section-header">
-                            <h2>留言列表</h2>
-                            <span className="count">总计: {messages.length}</span>
+                <button className="sidebar-collapse">
+                    <Icon name="collapse" />
+                    <span>收起菜单</span>
+                </button>
+            </aside>
+
+            <div className="admin-workspace">
+                <header className="admin-topbar">
+                    <button className="topbar-icon-btn" aria-label="打开菜单">
+                        <Icon name="menu" />
+                    </button>
+
+                    <button className="admin-user-card" onClick={handleLogout} title="点击退出登录">
+                        <span className="admin-avatar">易</span>
+                        <span className="admin-user-text">
+                            <strong>易亿</strong>
+                            <span>管理员</span>
+                        </span>
+                        <Icon name="chevron" />
+                    </button>
+                </header>
+
+                <main className="admin-content">
+                    <section className="admin-page-heading">
+                        <h1>留言管理</h1>
+                        <p>查看和管理客户留言信息，及时跟进客户需求</p>
+                    </section>
+
+                    <section className="admin-stats-grid">
+                        <article className="admin-stat-card">
+                            <span className="stat-icon blue">
+                                <Icon name="message" />
+                            </span>
+                            <div>
+                                <span className="stat-label">全部留言</span>
+                                <strong>{messages.length}</strong>
+                                <small>本地预览数据</small>
+                            </div>
+                        </article>
+                        <article className="admin-stat-card">
+                            <span className="stat-icon purple">
+                                <Icon name="document" />
+                            </span>
+                            <div>
+                                <span className="stat-label">今日新增</span>
+                                <strong>{todayCount}</strong>
+                                <small>按提交日期统计</small>
+                            </div>
+                        </article>
+                    </section>
+
+                    <section className="admin-filter-card">
+                        <label className="admin-search-field">
+                            <input
+                                value={search}
+                                onChange={(event) => {
+                                    setSearch(event.target.value);
+                                    setCurrentPage(1);
+                                }}
+                                placeholder="搜索客户姓名、邮箱或留言内容..."
+                            />
+                            <Icon name="search" />
+                        </label>
+
+                        <select
+                            value={country}
+                            onChange={(event) => {
+                                setCountry(event.target.value);
+                                setCurrentPage(1);
+                            }}
+                        >
+                            <option value="all">全部国家/地区</option>
+                            {Object.entries(COUNTRY_META).map(([code, meta]) => (
+                                <option key={code} value={code}>{meta.name}</option>
+                            ))}
+                        </select>
+
+                        <div className="admin-date-range">
+                            <input
+                                type="date"
+                                value={startDate}
+                                onChange={(event) => {
+                                    setStartDate(event.target.value);
+                                    setCurrentPage(1);
+                                }}
+                            />
+                            <span>~</span>
+                            <input
+                                type="date"
+                                value={endDate}
+                                onChange={(event) => {
+                                    setEndDate(event.target.value);
+                                    setCurrentPage(1);
+                                }}
+                            />
                         </div>
-                        <div className="table-container">
-                            <table className="admin-table">
-                                <thead>
-                                    <tr>
-                                        <th>日期</th>
-                                        <th>客户姓名</th>
-                                        <th>WhatsApp</th>
-                                        <th>留言内容</th>
-                                        <th>操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {messages.map(msg => (
+
+                        <button className="admin-filter-btn muted" onClick={resetFilters}>
+                            <Icon name="reset" />
+                            <span>重置</span>
+                        </button>
+                        <button className="admin-filter-btn primary">
+                            <Icon name="filter" />
+                            <span>筛选</span>
+                        </button>
+                    </section>
+
+                    <section className="admin-table-card">
+                        <table className="admin-message-table">
+                            <colgroup>
+                                <col className="col-date" />
+                                <col className="col-name" />
+                                <col className="col-email" />
+                                <col className="col-whatsapp" />
+                                <col className="col-country" />
+                                <col className="col-message" />
+                                <col className="col-actions" />
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th>日期</th>
+                                    <th>客户姓名</th>
+                                    <th>电子邮件</th>
+                                    <th>WhatsApp</th>
+                                    <th>国家/地区</th>
+                                    <th>留言内容</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {visibleMessages.map((msg) => {
+                                    const time = formatDateParts(msg.created_at);
+                                    const meta = getCountryMeta(msg.country_code);
+                                    return (
                                         <tr key={msg.id}>
-                                            <td className="time-td">{new Date(msg.created_at).toLocaleDateString()}</td>
-                                            <td>{msg.name}</td>
-                                            <td>{msg.country_code} {msg.whatsapp}</td>
-                                            <td className="message-td">{msg.message}</td>
                                             <td>
-                                                <button onClick={() => handleDeleteMessage(msg.id)} className="delete-btn">删除</button>
+                                                <span className="date-main">{time.date}</span>
+                                                <span className="date-sub">{time.time}</span>
+                                            </td>
+                                            <td><span className="cell-ellipsis strong-cell">{msg.name || '-'}</span></td>
+                                            <td><span className="cell-ellipsis muted-cell">{msg.email || '-'}</span></td>
+                                            <td><span className="cell-ellipsis">{msg.country_code} {msg.whatsapp}</span></td>
+                                            <td>
+                                                <span className="country-cell">
+                                                    {meta.flagCode ? (
+                                                        <img
+                                                            src={`https://flagcdn.com/24x18/${meta.flagCode}.png`}
+                                                            alt=""
+                                                            className="country-flag"
+                                                            width="24"
+                                                            height="18"
+                                                        />
+                                                    ) : (
+                                                        <span className="country-fallback">🌐</span>
+                                                    )}
+                                                    <span className="cell-ellipsis">{meta.name}</span>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div className="message-cell">
+                                                    <span>{msg.message || '-'}</span>
+                                                    <button onClick={() => setDetailMessage(msg)}>展开</button>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="row-actions">
+                                                    <button className="icon-action view" onClick={() => setDetailMessage(msg)} aria-label="查看详情">
+                                                        <Icon name="document" />
+                                                    </button>
+                                                    <button className="icon-action delete" onClick={() => handleDeleteMessage(msg.id)} aria-label="删除留言">
+                                                        <Icon name="trash" />
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
-                )}
+                                    );
+                                })}
+                            </tbody>
+                        </table>
 
-                {activeTab === 'news' && !isEditingNews && (
-                    <section className="admin-section">
-                        <div className="section-header">
-                            <h2>新闻中心管理</h2>
-                            <button className="add-news-btn" onClick={() => { setIsEditingNews(true); setCurrentNewsId(null); }}>
-                                + 发布新文章
+                        <footer className="table-footer">
+                            <span>共 {filteredMessages.length} 条记录</span>
+                            <div className="pagination">
+                                <button disabled={safeCurrentPage <= 1} onClick={() => setCurrentPage((page) => page - 1)}>‹</button>
+                                {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+                                    <button
+                                        key={page}
+                                        className={page === safeCurrentPage ? 'active' : ''}
+                                        onClick={() => setCurrentPage(page)}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+                                <button disabled={safeCurrentPage >= totalPages} onClick={() => setCurrentPage((page) => page + 1)}>›</button>
+                                <span className="page-size">{PAGE_SIZE} 条/页</span>
+                            </div>
+                        </footer>
+                    </section>
+                </main>
+            </div>
+
+            {detailMessage && (
+                <div className="detail-overlay" onClick={() => setDetailMessage(null)}>
+                    <article className="message-detail-popover" onClick={(event) => event.stopPropagation()}>
+                        <header>
+                            <div>
+                                <h2>客户详细信息</h2>
+                                <p>完整内容在这里查看，表格行高和列宽保持不变</p>
+                            </div>
+                            <button onClick={() => setDetailMessage(null)} aria-label="关闭详情">
+                                <Icon name="close" />
                             </button>
-                        </div>
-                        <div className="table-container">
-                            <table className="admin-table">
-                                <thead>
-                                    <tr>
-                                        <th>封面</th>
-                                        <th>文章标题</th>
-                                        <th>分类</th>
-                                        <th>发布时间</th>
-                                        <th>操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {newsList.map(news => (
-                                        <tr key={news.id}>
-                                            <td>
-                                                <img src={news.cover_image} alt="" style={{ width: '60px', borderRadius: '4px' }} />
-                                            </td>
-                                            <td style={{ fontWeight: 600 }}>{news.title}</td>
-                                            <td>{news.category}</td>
-                                            <td className="time-td">{new Date(news.created_at).toLocaleDateString()}</td>
-                                            <td>
-                                                <button onClick={() => handleDeleteNews(news.id)} className="delete-btn">删除</button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
-                )}
-
-                {isEditingNews && (
-                    <AdminNewsEditor 
-                        newsId={currentNewsId} 
-                        onSave={() => { fetchData(); setIsEditingNews(false); }}
-                        onCancel={() => setIsEditingNews(false)}
-                    />
-                )}
-            </main>
+                        </header>
+                        <dl>
+                            <div>
+                                <dt>客户姓名</dt>
+                                <dd>{detailMessage.name || '-'}</dd>
+                            </div>
+                            <div>
+                                <dt>电子邮件</dt>
+                                <dd>{detailMessage.email || '-'}</dd>
+                            </div>
+                            <div>
+                                <dt>WhatsApp</dt>
+                                <dd>{detailMessage.country_code} {detailMessage.whatsapp}</dd>
+                            </div>
+                            <div>
+                                <dt>国家/地区</dt>
+                                <dd>{getCountryMeta(detailMessage.country_code).name}</dd>
+                            </div>
+                            <div className="detail-message">
+                                <dt>留言内容</dt>
+                                <dd>{detailMessage.message || '-'}</dd>
+                            </div>
+                        </dl>
+                    </article>
+                </div>
+            )}
         </div>
     );
 };

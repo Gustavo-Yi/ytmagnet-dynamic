@@ -233,7 +233,7 @@ const COUNTRY_DATA = [
 const SITE_KEY = '0x4AAAAAAC93o6sHuLuZ4856';
 
 export default function ContactForm() {
-  const { t, lang } = useLanguage();
+  const { lang } = useLanguage();
   const turnstileRef = useRef(null);
   const dropdownRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -259,6 +259,7 @@ export default function ContactForm() {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
+        setSearchTerm('');
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -269,8 +270,6 @@ export default function ContactForm() {
   useEffect(() => {
     if (isDropdownOpen && searchInputRef.current) {
       searchInputRef.current.focus();
-    } else {
-      setSearchTerm(''); // Reset search when closed
     }
   }, [isDropdownOpen]);
 
@@ -282,6 +281,14 @@ export default function ContactForm() {
     setSelectedCountry(country);
     setForm(prev => ({ ...prev, country_code: country.code }));
     setIsDropdownOpen(false);
+    setSearchTerm('');
+  };
+
+  const toggleCountryDropdown = () => {
+    setIsDropdownOpen((open) => {
+      if (open) setSearchTerm('');
+      return !open;
+    });
   };
 
   const filteredCountries = COUNTRY_DATA.filter(c => {
@@ -386,7 +393,7 @@ export default function ContactForm() {
             <div className="custom-country-selector" ref={dropdownRef}>
               <div 
                 className={`cf-input cf-dropdown-trigger ${isDropdownOpen ? 'active' : ''}`}
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                onClick={toggleCountryDropdown}
               >
                 <img 
                   src={`https://flagcdn.com/w40/${selectedCountry.iso}.png`} 

@@ -1,6 +1,6 @@
 {
   "site": {
-    "name": "YT Magnet - Yutong Magnetics",
+    "name": "Yutong Magnet",
     "description": "Professional magnetic material manufacturer offering ferrite, NdFeB, photovoltaic and lithium battery solutions."
   },
   "cookie": {
@@ -23,35 +23,74 @@
   },
   "home": {
     "slides": {
-      "magnetic": { "title": "World Magnet Hub", "desc": "Ferrite · NdFeB · AlNiCo" },
-      "devices":  { "title": "Magnetic Devices",  "desc": "Transformers · Filters · Inductors" },
-      "solar":    { "title": "Green Energy",      "desc": "Monocrystalline · High-efficiency Cells · Modules" },
-      "battery":  { "title": "Energy Future",     "desc": "Cylindrical · Prismatic · Energy Storage Systems" }
+      "magnetic": {
+        "title": "World Magnet Hub",
+        "desc": "Ferrite · NdFeB · AlNiCo"
+      },
+      "devices": {
+        "title": "Magnetic Devices",
+        "desc": "Transformers · Filters · Inductors"
+      },
+      "solar": {
+        "title": "Green Energy",
+        "desc": "Monocrystalline · High-efficiency Cells · Modules"
+      },
+      "battery": {
+        "title": "Energy Future",
+        "desc": "Cylindrical · Prismatic · Energy Storage Systems"
+      }
     },
     "stats": {
-      "bases":   { "num": "10", "unit": "+", "label": "Production Bases" },
-      "markets": { "num": "20", "unit": "+", "label": "Marketing Networks" },
-      "exports": { "num": "60", "unit": "+", "label": "Export Countries" },
-      "supply":  { "num": "20", "unit": "+", "label": "Supply Chain Countries" }
+      "bases": {
+        "num": "10",
+        "unit": "+",
+        "label": "Production Bases"
+      },
+      "markets": {
+        "num": "20",
+        "unit": "+",
+        "label": "Marketing Networks"
+      },
+      "exports": {
+        "num": "60",
+        "unit": "+",
+        "label": "Export Countries"
+      },
+      "supply": {
+        "num": "20",
+        "unit": "+",
+        "label": "Supply Chain Countries"
+      }
+    },
+    "scrollHint": "Scroll Down"
+  },
+  "pages": {
+    "about": {
+      "title": "About Us",
+      "sub": "A Global Leader in Magnetic Materials",
+      "wip": "Page under construction, stay tuned..."
+    },
+    "products": {
+      "title": "Our Products",
+      "sub": "Magnetics · Devices · Solar · Battery",
+      "wip": "Page under construction, stay tuned..."
     },
     "news": {
       "title": "News Center",
-      "readmore": "Read More",
-      "scrollHint": "Scroll Down",
-      "items": [
-        { "day": "27", "date": "2026/02", "title": "YTMagnet Added a National-level Green Factory" },
-        { "day": "27", "date": "2026/01", "title": "National Standard Led by YTMagnet Approved, Effective April" },
-        { "day": "27", "date": "2026/01", "title": "Company Concept Verification Center Earned Provincial Recognition" }
-      ]
-    }
-  },
-  "pages": {
-    "about":    { "title": "About Us",            "sub": "A Global Leader in Magnetic Materials", "wip": "Page under construction, stay tuned..." },
-    "products": { "title": "Our Products",        "sub": "Magnetics · Devices · Solar · Battery",  "wip": "Page under construction, stay tuned..." },
-    "news":     { "title": "News Center",          "sub": "Corporate News · Industry Insights · Media Coverage", "wip": "Page under construction, stay tuned..." },
-    "investor": { "title": "Investor Relations",  "sub": "Announcements · Financial Reports · Shareholder Info", "wip": "Page under construction, stay tuned..." },
-    "join":     { "title": "Join Us",             "sub": "Grow with brilliant minds, shape the magnetic future", "wip": "Page under construction, stay tuned..." },
-    "contact":  {
+      "sub": "News module is being rebuilt",
+      "wip": "The old news content has been cleared. We will rebuild this section with a new structure."
+    },
+    "investor": {
+      "title": "Investor Relations",
+      "sub": "Announcements · Financial Reports · Shareholder Info",
+      "wip": "Page under construction, stay tuned..."
+    },
+    "join": {
+      "title": "Join Us",
+      "sub": "Grow with brilliant minds, shape the magnetic future",
+      "wip": "Page under construction, stay tuned..."
+    },
+    "contact": {
       "title": "Contact Us",
       "sub": "We look forward to building a lasting partnership with you",
       "address": {

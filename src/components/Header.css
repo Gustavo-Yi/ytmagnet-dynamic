@@ -44,14 +44,20 @@
 }
 
 .logo-text {
-  font-size: 28px;
+  font-size: 27px;
   font-weight: 700;
-  letter-spacing: 3px;
+  letter-spacing: 1px;
   color: white;
   text-decoration: none;
   line-height: 1;
   position: relative;
   top: -2px;
+}
+
+.logo-text-zh {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0;
 }
 
 /* ── Individual Nav Boxes (Glassmorphism) ── */

@@ -20,6 +20,7 @@ const Header = () => {
   };
 
   const currentFlag = FLAGS[lang];
+  const brandText = lang === 'zh' ? '宁波钰彤新材料科技有限公司' : 'Yutong Magnet';
 
   return (
     <header className={`main-header ${!isHome ? 'header-subpage' : ''}`}>
@@ -27,11 +28,11 @@ const Header = () => {
       <div className="header-logo">
         <Link to="/" className="logo-link">
           <img src="/logo.png" alt="YT Magnet Logo" className="logo-img" />
-          <span className="logo-text">YTMAGNET</span>
+          <span className={`logo-text ${lang === 'zh' ? 'logo-text-zh' : ''}`}>{brandText}</span>
         </Link>
       </div>
 
-      {/* 5-item navigation */}
+      {/* Main navigation */}
       <nav className="main-nav">
         <ul>
           <li className="nav-item-box">

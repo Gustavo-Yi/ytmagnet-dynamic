@@ -42,6 +42,10 @@
   transform: translate(-50%, -50%) scale(1.1);
 }
 
+.bg-video.is-hidden {
+  opacity: 0;
+}
+
 /* Tint overlay to keep text readable on top of dynamic video */
 .video-overlay {
   position: absolute;
@@ -184,124 +188,6 @@
   margin-top: 16px;
   letter-spacing: 2px;
   font-weight: 300;
-}
-
-/* ========================
-   NEWS SLIDE
-   ======================== */
-.news-slide {
-  width: 100%;
-  height: 100%;
-  padding: 120px 80px 60px;
-  display: flex;
-  flex-direction: column;
-}
-
-.news-header {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  margin-bottom: 60px;
-}
-
-.news-header h2 {
-  font-size: 32px;
-  font-weight: 300;
-  color: white;
-  letter-spacing: 4px;
-}
-
-/* Glassmorphism circle button for news "more" */
-.news-more-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  /* Glass effect */
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1), 0 1px 0 rgba(255,255,255,0.3) inset;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.news-more-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-}
-
-.news-list {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0;
-}
-
-.news-item {
-  padding: 30px 40px 30px 0;
-  border-right: 1px solid rgba(255,255,255,0.2);
-  cursor: pointer;
-  transition: transform 0.3s;
-  display: block;
-}
-
-.news-item:last-child {
-  border-right: none;
-  padding-right: 0;
-  padding-left: 40px;
-}
-
-.news-item:nth-child(2) {
-  padding-left: 40px;
-}
-
-.news-item:hover {
-  transform: translateY(-5px);
-}
-
-.news-date-block {
-  margin-bottom: 20px;
-}
-
-.news-day {
-  display: block;
-  font-size: 48px;
-  font-weight: 200;
-  color: white;
-  line-height: 1;
-  letter-spacing: -1px;
-}
-
-.news-month {
-  display: block;
-  font-size: 13px;
-  color: rgba(255,255,255,0.6);
-  letter-spacing: 1px;
-  margin-top: 4px;
-}
-
-.news-title {
-  font-size: 16px;
-  color: white;
-  font-weight: 300;
-  line-height: 1.6;
-  margin-bottom: 20px;
-  letter-spacing: 0.5px;
-}
-
-.news-readmore {
-  font-size: 13px;
-  color: rgba(255,255,255,0.55);
-  letter-spacing: 1px;
-}
-
-.news-item:hover .news-readmore {
-  color: rgba(255,255,255,0.9);
 }
 
 /* Bottom center dots (glassmorphism) */

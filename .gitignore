@@ -10,6 +10,11 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+screenshots/
+.chrome-admin-preview/
+.wrangler/
+wrangler.local.toml
+wrangler.toml
 *.local
 
 # Editor directories and files

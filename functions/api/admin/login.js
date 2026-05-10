@@ -5,6 +5,26 @@ const CORS_HEADERS = {
   'Content-Type': 'application/json',
 };
 
+const DEFAULT_ADMIN_USER = '易亿';
+const DEFAULT_ADMIN_PASS_HASH = 'aec592cf876a315cab301fe347101797aa15d4cf2850a35eaaf8152d330125fc';
+
+async function sha256Hex(value) {
+  const bytes = new TextEncoder().encode(value);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+function safeEqual(left, right) {
+  if (left.length !== right.length) return false;
+  let result = 0;
+  for (let index = 0; index < left.length; index += 1) {
+    result |= left.charCodeAt(index) ^ right.charCodeAt(index);
+  }
+  return result === 0;
+}
+
 export async function onRequestOptions() {
   return new Response(null, { status: 204, headers: CORS_HEADERS });
 }
@@ -22,11 +42,12 @@ export async function onRequestPost(context) {
 
     const { username, password } = body;
 
-    // Use environment variables or hardcoded defaults
-    const ADMIN_USER = env.ADMIN_USER || '易亿';
-    const ADMIN_PASS = env.ADMIN_PASS || 'yy342954...';
+    const hasHashSecret = Boolean(env.ADMIN_PASS_HASH);
+    const ADMIN_USER = hasHashSecret ? (env.ADMIN_USER || DEFAULT_ADMIN_USER) : DEFAULT_ADMIN_USER;
+    const ADMIN_PASS_HASH = env.ADMIN_PASS_HASH || DEFAULT_ADMIN_PASS_HASH;
+    const passwordHash = await sha256Hex(password || '');
 
-    if (username === ADMIN_USER && password === ADMIN_PASS) {
+    if (username === ADMIN_USER && safeEqual(passwordHash, ADMIN_PASS_HASH)) {
       // Safe Base64 for Unicode: Encode to UTF-8 then base64
       const tokenObj = { user: 'admin', exp: Date.now() + 86400000 };
       const token = btoa(JSON.stringify(tokenObj));
