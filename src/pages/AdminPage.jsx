@@ -21,15 +21,15 @@ const PAGE_SIZE = 10;
 
 const Icon = ({ name }) => {
     const icons = {
-        menu: <path d="M4 7h16M4 12h16M4 17h16" />,
         message: <path d="M5 6.5h14v9H9l-4 3v-12Z" />,
         document: <path d="M8 3.5h6l4 4V20H8V3.5Zm6 0v4h4M10.5 11h5M10.5 14h5M10.5 17h3" />,
+        view: <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Zm9.5 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />,
+        copy: <path d="M8 8h10v12H8V8Zm-4 8V4h10" />,
         search: <path d="m20 20-4.2-4.2M18 10.5A7.5 7.5 0 1 1 3 10.5a7.5 7.5 0 0 1 15 0Z" />,
         reset: <path d="M4 12a8 8 0 1 0 2.34-5.66M4 4v5h5" />,
         filter: <path d="M4 5h16l-6 7v5l-4 2v-7L4 5Z" />,
         trash: <path d="M5 7h14M10 11v5M14 11v5M8 7l1-3h6l1 3M7 7l1 13h8l1-13" />,
         chevron: <path d="m8 10 4 4 4-4" />,
-        collapse: <path d="m15 6-6 6 6 6M20 6l-6 6 6 6" />,
         close: <path d="M6 6l12 12M18 6 6 18" />,
     };
 
@@ -77,6 +77,8 @@ const AdminPage = () => {
     const [endDate, setEndDate] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [detailMessage, setDetailMessage] = useState(null);
+    const [countryMenuOpen, setCountryMenuOpen] = useState(false);
+    const [copiedMessageId, setCopiedMessageId] = useState(null);
     const navigate = useNavigate();
 
     const fetchMessages = useCallback(async () => {
@@ -146,6 +148,13 @@ const AdminPage = () => {
     const safeCurrentPage = Math.min(currentPage, totalPages);
     const visibleMessages = filteredMessages.slice((safeCurrentPage - 1) * PAGE_SIZE, safeCurrentPage * PAGE_SIZE);
     const todayCount = messages.filter((msg) => isSameDay(msg.created_at)).length;
+    const countryOptions = useMemo(() => {
+        const codes = Array.from(new Set(messages.map((msg) => msg.country_code).filter(Boolean)));
+        return codes
+            .map((code) => ({ code, ...getCountryMeta(code) }))
+            .sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
+    }, [messages]);
+    const selectedCountryMeta = country === 'all' ? null : getCountryMeta(country);
 
     const handleDeleteMessage = async (id) => {
         if (!window.confirm('确定要删除这条留言吗？')) return;
@@ -165,9 +174,28 @@ const AdminPage = () => {
         }
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem('admin_token');
-        navigate('/admin/login');
+    const handleCopyWhatsApp = async (msg) => {
+        const value = [msg.country_code, msg.whatsapp].filter(Boolean).join(' ').trim();
+        if (!value) return;
+
+        try {
+            await navigator.clipboard.writeText(value);
+        } catch {
+            const textarea = document.createElement('textarea');
+            textarea.value = value;
+            textarea.setAttribute('readonly', '');
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+        }
+
+        setCopiedMessageId(msg.id);
+        window.setTimeout(() => {
+            setCopiedMessageId((currentId) => (currentId === msg.id ? null : currentId));
+        }, 1400);
     };
 
     const resetFilters = () => {
@@ -186,15 +214,15 @@ const AdminPage = () => {
         <div className="admin-shell">
             <aside className="admin-sidebar">
                 <div className="sidebar-brand">
-                    <img src="/logo.png" alt="YT MAGNET" className="sidebar-logo-img" />
+                    <img src="/logo.png" alt="Yutong Magnet" className="sidebar-logo-img" />
                     <div>
-                        <strong>YT MAGNET</strong>
+                        <strong>Yutong Magnet</strong>
                         <span>管理后台</span>
                     </div>
                 </div>
 
                 <nav className="sidebar-nav">
-                    <button className="sidebar-link">
+                    <button className="sidebar-link" onClick={() => navigate('/')}>
                         <Icon name="message" />
                         <span>首页</span>
                     </button>
@@ -203,27 +231,18 @@ const AdminPage = () => {
                         <span>留言管理</span>
                     </button>
                 </nav>
-
-                <button className="sidebar-collapse">
-                    <Icon name="collapse" />
-                    <span>收起菜单</span>
-                </button>
             </aside>
 
             <div className="admin-workspace">
                 <header className="admin-topbar">
-                    <button className="topbar-icon-btn" aria-label="打开菜单">
-                        <Icon name="menu" />
-                    </button>
-
-                    <button className="admin-user-card" onClick={handleLogout} title="点击退出登录">
+                    <div className="admin-user-card" aria-label="当前管理员">
                         <span className="admin-avatar">易</span>
                         <span className="admin-user-text">
                             <strong>易亿</strong>
                             <span>管理员</span>
                         </span>
                         <Icon name="chevron" />
-                    </button>
+                    </div>
                 </header>
 
                 <main className="admin-content">
@@ -268,18 +287,76 @@ const AdminPage = () => {
                             <Icon name="search" />
                         </label>
 
-                        <select
-                            value={country}
-                            onChange={(event) => {
-                                setCountry(event.target.value);
-                                setCurrentPage(1);
+                        <div
+                            className="country-filter"
+                            onBlur={(event) => {
+                                if (!event.currentTarget.contains(event.relatedTarget)) {
+                                    setCountryMenuOpen(false);
+                                }
                             }}
                         >
-                            <option value="all">全部国家/地区</option>
-                            {Object.entries(COUNTRY_META).map(([code, meta]) => (
-                                <option key={code} value={code}>{meta.name}</option>
-                            ))}
-                        </select>
+                            <button
+                                type="button"
+                                className="country-filter-trigger"
+                                aria-haspopup="listbox"
+                                aria-expanded={countryMenuOpen}
+                                onClick={() => setCountryMenuOpen((isOpen) => !isOpen)}
+                            >
+                                {selectedCountryMeta?.flagCode && (
+                                    <img
+                                        src={`https://flagcdn.com/24x18/${selectedCountryMeta.flagCode}.png`}
+                                        alt=""
+                                        className="country-flag"
+                                        width="24"
+                                        height="18"
+                                    />
+                                )}
+                                <span>{selectedCountryMeta ? selectedCountryMeta.name : '全部国家/地区'}</span>
+                                <Icon name="chevron" />
+                            </button>
+
+                            {countryMenuOpen && (
+                                <div className="country-filter-menu" role="listbox">
+                                    <button
+                                        type="button"
+                                        className={`country-filter-option ${country === 'all' ? 'active' : ''}`}
+                                        onClick={() => {
+                                            setCountry('all');
+                                            setCurrentPage(1);
+                                            setCountryMenuOpen(false);
+                                        }}
+                                    >
+                                        <span className="country-option-icon">全部</span>
+                                        <span>全部国家/地区</span>
+                                    </button>
+                                    {countryOptions.map((option) => (
+                                        <button
+                                            key={option.code}
+                                            type="button"
+                                            className={`country-filter-option ${country === option.code ? 'active' : ''}`}
+                                            onClick={() => {
+                                                setCountry(option.code);
+                                                setCurrentPage(1);
+                                                setCountryMenuOpen(false);
+                                            }}
+                                        >
+                                            {option.flagCode ? (
+                                                <img
+                                                    src={`https://flagcdn.com/24x18/${option.flagCode}.png`}
+                                                    alt=""
+                                                    className="country-flag"
+                                                    width="24"
+                                                    height="18"
+                                                />
+                                            ) : (
+                                                <span className="country-fallback">🌐</span>
+                                            )}
+                                            <span>{option.name}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
 
                         <div className="admin-date-range">
                             <input
@@ -365,15 +442,17 @@ const AdminPage = () => {
                                             <td>
                                                 <div className="message-cell">
                                                     <span>{msg.message || '-'}</span>
-                                                    <button onClick={() => setDetailMessage(msg)}>展开</button>
                                                 </div>
                                             </td>
                                             <td>
                                                 <div className="row-actions">
-                                                    <button className="icon-action view" onClick={() => setDetailMessage(msg)} aria-label="查看详情">
-                                                        <Icon name="document" />
+                                                    <button className="icon-action view" onClick={() => setDetailMessage(msg)} aria-label="查看客户详情" title="查看客户详情">
+                                                        <Icon name="view" />
                                                     </button>
-                                                    <button className="icon-action delete" onClick={() => handleDeleteMessage(msg.id)} aria-label="删除留言">
+                                                    <button className="icon-action copy" onClick={() => handleCopyWhatsApp(msg)} aria-label="复制 WhatsApp" title={copiedMessageId === msg.id ? '已复制' : '复制 WhatsApp'}>
+                                                        <Icon name="copy" />
+                                                    </button>
+                                                    <button className="icon-action delete" onClick={() => handleDeleteMessage(msg.id)} aria-label="删除留言" title="删除留言">
                                                         <Icon name="trash" />
                                                     </button>
                                                 </div>
