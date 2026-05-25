@@ -12,6 +12,7 @@ dist
 dist-ssr
 screenshots/
 .chrome-admin-preview/
+.codex/
 .wrangler/
 wrangler.local.toml
 wrangler.toml
