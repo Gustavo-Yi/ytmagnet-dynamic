@@ -41,6 +41,7 @@ CREATE TABLE news_posts (
     seo_title_en TEXT,
     seo_description_zh TEXT,
     seo_description_en TEXT,
+    pinned INTEGER NOT NULL DEFAULT 0,
     featured INTEGER NOT NULL DEFAULT 0,
     published_at DATETIME,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -52,3 +53,6 @@ CREATE INDEX idx_news_posts_public
 
 CREATE INDEX idx_news_posts_category
     ON news_posts (category, status, published_at DESC);
+
+CREATE INDEX idx_news_posts_pinned
+    ON news_posts (status, pinned DESC, published_at DESC, id DESC);

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import RichTextEditor from '../components/RichTextEditor';
 import usePageTitle from '../hooks/usePageTitle';
 import './Admin.css';
 import './AdminDashboard.css';
@@ -36,6 +37,7 @@ const EMPTY_NEWS_FORM = {
     slug: '',
     category: 'company',
     status: 'draft',
+    pinned: false,
     title_zh: '',
     title_en: '',
     summary_zh: '',
@@ -125,6 +127,20 @@ const toIsoOrNull = (value) => {
     return Number.isNaN(date.getTime()) ? null : date.toISOString();
 };
 
+const stripHtmlText = (value) => String(value || '')
+    .replace(/<img\b[^>]*>/gi, ' image ')
+    .replace(/<table\b[^>]*>/gi, ' table ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const normalizeRichTextForSave = (value) => {
+    const html = String(value || '').trim();
+    return stripHtmlText(html) ? html : '';
+};
+
 const isSameDay = (value, date = new Date()) => {
     const target = new Date(value);
     if (Number.isNaN(target.getTime())) return false;
@@ -137,6 +153,7 @@ const isSameDay = (value, date = new Date()) => {
 const normalizeNewsForm = (post = {}) => ({
     ...EMPTY_NEWS_FORM,
     ...post,
+    pinned: Boolean(post.pinned),
     featured: Boolean(post.featured),
     published_at: post.published_at ? toDateTimeLocalInput(post.published_at) : '',
 });
@@ -287,6 +304,8 @@ const AdminPage = () => {
                 post.summary_en,
                 post.content_zh,
                 post.content_en,
+                post.pinned ? '置顶新闻' : '',
+                post.featured ? '精选新闻' : '',
                 getCategoryLabel(post.category),
                 getStatusLabel(post.status),
             ].filter(Boolean).join(' ').toLowerCase().includes(keyword);
@@ -311,6 +330,7 @@ const AdminPage = () => {
     const latestActivity = messages[0] ? formatDateParts(messages[0].created_at) : null;
     const publishedCount = newsPosts.filter((post) => post.status === 'published').length;
     const draftCount = newsPosts.filter((post) => post.status === 'draft').length;
+    const pinnedCount = newsPosts.filter((post) => post.pinned).length;
     const featuredCount = newsPosts.filter((post) => post.featured).length;
 
     const handleDeleteMessage = async (id) => {
@@ -340,7 +360,14 @@ const AdminPage = () => {
     };
 
     const updateNewsForm = (field, value) => {
-        setNewsForm((current) => ({ ...current, [field]: value }));
+        setNewsForm((current) => {
+            const next = { ...current, [field]: value };
+            if (field === 'status' && value !== 'published') {
+                next.pinned = false;
+                next.featured = false;
+            }
+            return next;
+        });
     };
 
     const openCreateNews = () => {
@@ -350,11 +377,35 @@ const AdminPage = () => {
         setNotice(null);
     };
 
-    const openEditNews = (post) => {
+    const openEditNews = async (post) => {
         setNewsEditingId(post.id);
         setNewsForm(normalizeNewsForm(post));
         setNewsDrawerMode('edit');
         setNotice(null);
+
+        const token = requireToken();
+        if (!token) return;
+
+        try {
+            const response = await fetch(`/api/admin/news?id=${post.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (response.status === 401) {
+                handleUnauthorized();
+                return;
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                setNewsForm(normalizeNewsForm(data.data));
+            } else {
+                setNotice({ type: 'error', text: data.message || '新闻详情加载失败' });
+            }
+        } catch (err) {
+            console.error(err);
+            setNotice({ type: 'error', text: '新闻详情加载失败，请稍后重试' });
+        }
     };
 
     const closeNewsDrawer = () => {
@@ -364,60 +415,81 @@ const AdminPage = () => {
         setCoverUploading(false);
     };
 
+    const uploadNewsImage = useCallback(async (file, scope = 'cover') => {
+        const token = requireToken();
+        if (!token) return null;
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('scope', scope);
+
+        const response = await fetch('/api/admin/news/upload', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+            body: formData,
+        });
+
+        if (response.status === 401) {
+            handleUnauthorized();
+            return null;
+        }
+
+        const data = await response.json();
+        if (!data.success) {
+            throw new Error(data.message || '图片上传失败');
+        }
+
+        return data.data;
+    }, [handleUnauthorized, requireToken]);
+
     const handleCoverUpload = async (event) => {
         const file = event.target.files?.[0];
         event.target.value = '';
         if (!file) return;
 
-        const token = requireToken();
-        if (!token) return;
-
         setCoverUploading(true);
         setNotice(null);
 
         try {
-            const formData = new FormData();
-            formData.append('file', file);
-
-            const response = await fetch('/api/admin/news/upload', {
-                method: 'POST',
-                headers: { Authorization: `Bearer ${token}` },
-                body: formData,
-            });
-
-            if (response.status === 401) {
-                handleUnauthorized();
-                return;
-            }
-
-            const data = await response.json();
-            if (!data.success) {
-                setNotice({ type: 'error', text: data.message || '封面上传失败' });
-                return;
-            }
-
+            const image = await uploadNewsImage(file, 'cover');
+            if (!image) return;
             setNewsForm((current) => ({
                 ...current,
-                cover_image_key: data.data.key,
-                cover_image_url: data.data.url,
+                cover_image_key: image.key,
+                cover_image_url: image.url,
             }));
             setNotice({ type: 'success', text: '封面已上传' });
         } catch (err) {
             console.error(err);
-            setNotice({ type: 'error', text: '封面上传失败，请稍后重试' });
+            setNotice({ type: 'error', text: err.message || '封面上传失败，请稍后重试' });
         } finally {
             setCoverUploading(false);
         }
     };
 
+    const handleContentImageUpload = useCallback(async (file) => {
+        setNotice(null);
+        try {
+            const image = await uploadNewsImage(file, 'content');
+            if (image) {
+                setNotice({ type: 'success', text: '正文图片已插入' });
+            }
+            return image;
+        } catch (err) {
+            console.error(err);
+            setNotice({ type: 'error', text: err.message || '正文图片上传失败，请稍后重试' });
+            return null;
+        }
+    }, [uploadNewsImage]);
+
     const buildNewsPayload = () => ({
         ...newsForm,
         title_zh: newsForm.title_zh.trim(),
-        content_zh: newsForm.content_zh.trim(),
+        content_zh: normalizeRichTextForSave(newsForm.content_zh),
         title_en: newsForm.title_en.trim(),
         summary_zh: newsForm.summary_zh.trim(),
         summary_en: newsForm.summary_en.trim(),
-        content_en: newsForm.content_en.trim(),
+        content_en: normalizeRichTextForSave(newsForm.content_en),
         slug: newsForm.slug.trim(),
         cover_image_key: newsForm.cover_image_key || null,
         cover_image_url: newsForm.cover_image_url || null,
@@ -427,7 +499,8 @@ const AdminPage = () => {
         seo_title_en: newsForm.seo_title_en.trim(),
         seo_description_zh: newsForm.seo_description_zh.trim(),
         seo_description_en: newsForm.seo_description_en.trim(),
-        featured: Boolean(newsForm.featured),
+        pinned: newsForm.status === 'published' && Boolean(newsForm.pinned),
+        featured: newsForm.status === 'published' && Boolean(newsForm.featured),
         published_at: toIsoOrNull(newsForm.published_at),
     });
 
@@ -437,7 +510,7 @@ const AdminPage = () => {
             return;
         }
 
-        if (!newsForm.content_zh.trim()) {
+        if (!normalizeRichTextForSave(newsForm.content_zh)) {
             setNotice({ type: 'error', text: '请填写中文正文' });
             return;
         }
@@ -692,10 +765,17 @@ const AdminPage = () => {
                     <strong>{draftCount}</strong>
                 </article>
                 <article className="admin-stat-card news-stat-card">
+                    <span className="stat-icon blue">
+                        <Icon name="star" />
+                    </span>
+                    <span className="stat-label">置顶</span>
+                    <strong>{pinnedCount}</strong>
+                </article>
+                <article className="admin-stat-card news-stat-card">
                     <span className="stat-icon gold">
                         <Icon name="star" />
                     </span>
-                    <span className="stat-label">推荐</span>
+                    <span className="stat-label">精选</span>
                     <strong>{featuredCount}</strong>
                 </article>
             </section>
@@ -805,7 +885,8 @@ const AdminPage = () => {
                                         <div className="news-title-cell">
                                             <div>
                                                 <strong>{post.title_zh}</strong>
-                                                {post.featured && <span className="feature-dot">推荐</span>}
+                                                {post.pinned && <span className="pin-dot">置顶</span>}
+                                                {post.featured && <span className="feature-dot">精选</span>}
                                             </div>
                                             <span>{post.slug}</span>
                                             {post.summary_zh && <p>{post.summary_zh}</p>}
@@ -1014,14 +1095,29 @@ const AdminPage = () => {
                                         </select>
                                     </label>
                                 </div>
-                                <label className="admin-check-field">
-                                    <input
-                                        type="checkbox"
-                                        checked={newsForm.featured}
-                                        onChange={(event) => updateNewsForm('featured', event.target.checked)}
-                                    />
-                                    <span>推荐到新闻列表靠前位置</span>
-                                </label>
+                                <div className="admin-check-group">
+                                    <label className="admin-check-field">
+                                        <input
+                                            type="checkbox"
+                                            checked={newsForm.pinned}
+                                            disabled={newsForm.status !== 'published'}
+                                            onChange={(event) => updateNewsForm('pinned', event.target.checked)}
+                                        />
+                                        <span>置顶新闻中心最上方大图</span>
+                                    </label>
+                                    <label className="admin-check-field">
+                                        <input
+                                            type="checkbox"
+                                            checked={newsForm.featured}
+                                            disabled={newsForm.status !== 'published'}
+                                            onChange={(event) => updateNewsForm('featured', event.target.checked)}
+                                        />
+                                        <span>加入精选新闻横向卡片</span>
+                                    </label>
+                                </div>
+                                {newsForm.status !== 'published' && (
+                                    <p className="editor-helper-text">草稿不会在前台展示，也不会进入置顶或精选。</p>
+                                )}
                             </section>
 
                             <section className="editor-section">
@@ -1082,14 +1178,22 @@ const AdminPage = () => {
 
                             <section className="editor-section">
                                 <h3>正文内容</h3>
-                                <label className="admin-field">
-                                    <span>中文正文 *</span>
-                                    <textarea rows="9" value={newsForm.content_zh} onChange={(event) => updateNewsForm('content_zh', event.target.value)} />
-                                </label>
-                                <label className="admin-field">
-                                    <span>英文正文</span>
-                                    <textarea rows="7" value={newsForm.content_en} onChange={(event) => updateNewsForm('content_en', event.target.value)} />
-                                </label>
+                                <RichTextEditor
+                                    label="中文正文 *"
+                                    value={newsForm.content_zh}
+                                    onChange={(value) => updateNewsForm('content_zh', value)}
+                                    onUploadImage={handleContentImageUpload}
+                                    placeholder="输入新闻正文，可以插入标题、列表、图片和表格..."
+                                    disabled={newsSaving}
+                                />
+                                <RichTextEditor
+                                    label="英文正文"
+                                    value={newsForm.content_en}
+                                    onChange={(value) => updateNewsForm('content_en', value)}
+                                    onUploadImage={handleContentImageUpload}
+                                    placeholder="Write the English article body..."
+                                    disabled={newsSaving}
+                                />
                             </section>
 
                             <section className="editor-section">

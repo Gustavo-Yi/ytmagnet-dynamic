@@ -75,6 +75,7 @@ function mapPost(request, env, post) {
   return {
     ...post,
     cover_image_url: makeImageUrl(request, env, post.cover_image_key, post.cover_image_url),
+    pinned: Boolean(post.pinned),
     featured: Boolean(post.featured),
   };
 }
@@ -129,6 +130,7 @@ function buildPostInput(body, existing, request, env) {
 
   const coverImageKey = text(body.cover_image_key, existing?.cover_image_key || '', 500);
   const coverImageUrlInput = text(body.cover_image_url, existing?.cover_image_url || '', 1000);
+  const isPublished = status === 'published';
 
   return {
     data: {
@@ -149,10 +151,15 @@ function buildPostInput(body, existing, request, env) {
       seo_title_en: text(body.seo_title_en, existing?.seo_title_en || '', 180),
       seo_description_zh: text(body.seo_description_zh, existing?.seo_description_zh || '', 360),
       seo_description_en: text(body.seo_description_en, existing?.seo_description_en || '', 360),
-      featured: body.featured === undefined ? Number(existing?.featured || 0) : (body.featured ? 1 : 0),
+      pinned: isPublished && (body.pinned === undefined ? Number(existing?.pinned || 0) : (body.pinned ? 1 : 0)) ? 1 : 0,
+      featured: isPublished && (body.featured === undefined ? Number(existing?.featured || 0) : (body.featured ? 1 : 0)) ? 1 : 0,
       published_at: publishedAt,
     },
   };
+}
+
+async function clearOtherPinnedPosts(env, id) {
+  await env.DB.prepare('UPDATE news_posts SET pinned = 0 WHERE id <> ?').bind(id).run();
 }
 
 async function deleteR2Object(env, key) {
@@ -237,7 +244,7 @@ export async function onRequestGet(context) {
         id, slug, category, status, title_zh, title_en, summary_zh, summary_en,
         cover_image_key, cover_image_url, cover_image_alt_zh, cover_image_alt_en,
         seo_title_zh, seo_title_en, seo_description_zh, seo_description_en,
-        featured, published_at, created_at, updated_at
+        pinned, featured, published_at, created_at, updated_at
        FROM news_posts
        WHERE ${whereSql}
        ORDER BY updated_at DESC, id DESC
@@ -288,9 +295,9 @@ export async function onRequestPost(context) {
         slug, category, status, title_zh, title_en, summary_zh, summary_en,
         content_zh, content_en, cover_image_key, cover_image_url,
         cover_image_alt_zh, cover_image_alt_en, seo_title_zh, seo_title_en,
-        seo_description_zh, seo_description_en, featured, published_at,
+        seo_description_zh, seo_description_en, pinned, featured, published_at,
         created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       slug,
       input.data.category,
@@ -309,14 +316,20 @@ export async function onRequestPost(context) {
       input.data.seo_title_en,
       input.data.seo_description_zh,
       input.data.seo_description_en,
+      input.data.pinned,
       input.data.featured,
       input.data.published_at,
       now,
       now
     ).run();
 
+    const postId = result.meta.last_row_id;
+    if (input.data.pinned) {
+      await clearOtherPinnedPosts(env, postId);
+    }
+
     const post = await env.DB.prepare('SELECT * FROM news_posts WHERE id = ? LIMIT 1')
-      .bind(result.meta.last_row_id)
+      .bind(postId)
       .first();
 
     return json({ success: true, data: mapPost(request, env, post) }, 201);
@@ -380,6 +393,7 @@ export async function onRequestPut(context) {
            seo_title_en = ?,
            seo_description_zh = ?,
            seo_description_en = ?,
+           pinned = ?,
            featured = ?,
            published_at = ?,
            updated_at = ?
@@ -402,11 +416,16 @@ export async function onRequestPut(context) {
       input.data.seo_title_en,
       input.data.seo_description_zh,
       input.data.seo_description_en,
+      input.data.pinned,
       input.data.featured,
       input.data.published_at,
       new Date().toISOString(),
       id
     ).run();
+
+    if (input.data.pinned) {
+      await clearOtherPinnedPosts(env, id);
+    }
 
     if (oldCoverKey && oldCoverKey !== newCoverKey) {
       await deleteR2Object(env, oldCoverKey).catch(() => {});

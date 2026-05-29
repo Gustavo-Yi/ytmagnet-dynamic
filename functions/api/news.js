@@ -36,6 +36,7 @@ function mapPost(request, env, post) {
   return {
     ...post,
     cover_image_url: getImageUrl(request, env, post.cover_image_key, post.cover_image_url),
+    pinned: Boolean(post.pinned),
     featured: Boolean(post.featured),
   };
 }
@@ -102,10 +103,10 @@ export async function onRequestGet(context) {
         id, slug, category, status, title_zh, title_en, summary_zh, summary_en,
         cover_image_key, cover_image_url, cover_image_alt_zh, cover_image_alt_en,
         seo_title_zh, seo_title_en, seo_description_zh, seo_description_en,
-        featured, published_at, created_at, updated_at
+        pinned, featured, published_at, created_at, updated_at
        FROM news_posts
        WHERE ${whereSql}
-       ORDER BY featured DESC, published_at DESC, id DESC
+       ORDER BY pinned DESC, featured DESC, published_at DESC, id DESC
        LIMIT ? OFFSET ?`
     ).bind(...binds, pageSize, offset).all();
 

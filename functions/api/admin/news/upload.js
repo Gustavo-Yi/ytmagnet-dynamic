@@ -85,8 +85,10 @@ export async function onRequestPost(context) {
     return json({ success: false, message: 'Image file must be smaller than 5MB.' }, 400);
   }
 
+  const scope = String(formData.get('scope') || 'cover').toLowerCase();
+  const folder = scope === 'content' ? 'content' : 'covers';
   const datePrefix = new Date().toISOString().slice(0, 10);
-  const key = `news/covers/${datePrefix}/${crypto.randomUUID()}.${extension}`;
+  const key = `news/${folder}/${datePrefix}/${crypto.randomUUID()}.${extension}`;
   const buffer = await file.arrayBuffer();
 
   await env.R2.put(key, buffer, {

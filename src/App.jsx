@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import CookieConsent from './components/CookieConsent';
@@ -10,9 +10,10 @@ import NewsPage from './pages/NewsPage';
 import InvestorPage from './pages/InvestorPage';
 import JoinPage from './pages/JoinPage';
 import ContactPage from './pages/ContactPage';
-import AdminPage from './pages/AdminPage';
 import LoginPage from './pages/LoginPage';
 import './App.css';
+
+const AdminPage = lazy(() => import('./pages/AdminPage'));
 
 function App() {
   const location = useLocation();
@@ -30,10 +31,11 @@ function App() {
         <Route path="/products"   element={<ProductsPage />} />
         <Route path="/products/:category" element={<ProductsPage />} />
         <Route path="/news"       element={<NewsPage />} />
+        <Route path="/news/:slug" element={<NewsPage />} />
         <Route path="/investor"   element={<InvestorPage />} />
         <Route path="/join"       element={<JoinPage />} />
         <Route path="/contact"    element={<ContactPage />} />
-        <Route path="/admin"      element={<AdminPage />} />
+        <Route path="/admin"      element={<Suspense fallback={<div className="admin-loading light-theme">正在加载后台系统...</div>}><AdminPage /></Suspense>} />
         <Route path="/admin/login" element={<LoginPage />} />
       </Routes>
 
