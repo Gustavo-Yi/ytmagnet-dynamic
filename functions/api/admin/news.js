@@ -5,7 +5,7 @@ const CORS_HEADERS = {
   'Content-Type': 'application/json',
 };
 
-const CATEGORY_VALUES = new Set(['company', 'product', 'industry']);
+const CATEGORY_VALUES = new Set(['company', 'industry']);
 const STATUS_VALUES = new Set(['draft', 'published']);
 
 function json(data, status = 200) {
@@ -74,6 +74,7 @@ function makeImageUrl(request, env, key, storedUrl) {
 function mapPost(request, env, post) {
   return {
     ...post,
+    category: CATEGORY_VALUES.has(post.category) ? post.category : 'company',
     cover_image_url: makeImageUrl(request, env, post.cover_image_key, post.cover_image_url),
     pinned: Boolean(post.pinned),
     featured: Boolean(post.featured),
@@ -110,9 +111,13 @@ function buildPostInput(body, existing, request, env) {
   if (!titleZh) return { error: 'title_zh is required.' };
   if (!contentZh) return { error: 'content_zh is required.' };
 
-  const category = text(body.category, existing?.category || 'company', 40);
+  const category = text(
+    body.category,
+    CATEGORY_VALUES.has(existing?.category) ? existing.category : 'company',
+    40
+  );
   if (!CATEGORY_VALUES.has(category)) {
-    return { error: 'category must be company, product, or industry.' };
+    return { error: 'category must be company or industry.' };
   }
 
   const status = text(body.status, existing?.status || 'draft', 40);
@@ -211,9 +216,16 @@ export async function onRequestGet(context) {
     const where = ['1 = 1'];
     const binds = [];
 
-    if (category && CATEGORY_VALUES.has(category)) {
-      where.push('category = ?');
-      binds.push(category);
+    if (category) {
+      if (!CATEGORY_VALUES.has(category)) {
+        where.push('1 = 0');
+      } else if (category === 'company') {
+        where.push('category IN (?, ?)');
+        binds.push('company', 'product');
+      } else {
+        where.push('category = ?');
+        binds.push(category);
+      }
     }
 
     if (status && STATUS_VALUES.has(status)) {

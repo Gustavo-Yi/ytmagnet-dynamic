@@ -1,7 +1,7 @@
 const SITE_NAME = '宁波钰彤新材料科技有限公司';
 const SITE_NAME_EN = 'Yutong Magnet';
 const NEWS_TITLE = `新闻中心 | ${SITE_NAME}`;
-const NEWS_DESCRIPTION = '了解宁波钰彤新材料科技有限公司最新动态、磁性材料知识、磁组件定制案例与行业资讯。';
+const NEWS_DESCRIPTION = '了解宁波钰彤新材料科技有限公司的公司新闻、磁组件定制案例与行业资讯。';
 
 function escapeHtml(value) {
   return String(value || '')

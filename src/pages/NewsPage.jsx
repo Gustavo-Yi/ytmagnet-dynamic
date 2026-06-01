@@ -6,8 +6,7 @@ import { useLanguage } from '../context/LanguageContext';
 import './NewsPage.css';
 
 const CATEGORY_OPTIONS = [
-  { value: 'company', zh: '公司动态', en: 'Company News' },
-  { value: 'product', zh: '产品知识', en: 'Product Insights' },
+  { value: 'company', zh: '公司新闻', en: 'Company News' },
   { value: 'industry', zh: '行业资讯', en: 'Industry News' },
 ];
 
@@ -19,7 +18,7 @@ const COPY = {
   zh: {
     listTitle: '新闻中心',
     listSubtitle: '宇通磁业资讯',
-    heroText: '了解宇通磁业最新动态、行业趋势与产品知识，掌握磁性应用的前沿信息与解决方案。',
+    heroText: '了解宇通磁业公司新闻与行业趋势，掌握磁性应用的前沿信息与解决方案。',
     featuredTitle: '精选新闻',
     featuredEyebrow: '重点推荐',
     categoryTitle: '新闻分类',
@@ -27,7 +26,7 @@ const COPY = {
     readMore: '阅读全文',
     loading: '正在加载新闻内容...',
     emptyTitle: '暂无新闻内容',
-    emptyText: '后台发布新闻后，这里会自动展示公司动态、产品知识和行业资讯。',
+    emptyText: '后台发布新闻后，这里会自动展示公司新闻和行业资讯。',
     categoryEmpty: '这个分类暂时没有新闻',
     back: '返回新闻中心',
     notFound: '没有找到这篇新闻',
@@ -43,7 +42,7 @@ const COPY = {
   en: {
     listTitle: 'News Center',
     listSubtitle: 'Yutong Magnet Updates',
-    heroText: 'Explore Yutong Magnet updates, industry trends, and practical product insights for magnetic applications.',
+    heroText: 'Explore Yutong Magnet company news and industry trends for magnetic applications.',
     featuredTitle: 'Featured News',
     featuredEyebrow: 'Editor Picks',
     categoryTitle: 'News Categories',

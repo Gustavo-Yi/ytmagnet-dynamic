@@ -5,7 +5,7 @@ const CORS_HEADERS = {
   'Content-Type': 'application/json',
 };
 
-const CATEGORY_VALUES = new Set(['company', 'product', 'industry']);
+const CATEGORY_VALUES = new Set(['company', 'industry']);
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: CORS_HEADERS });
@@ -35,6 +35,7 @@ function getImageUrl(request, env, key, storedUrl) {
 function mapPost(request, env, post) {
   return {
     ...post,
+    category: CATEGORY_VALUES.has(post.category) ? post.category : 'company',
     cover_image_url: getImageUrl(request, env, post.cover_image_key, post.cover_image_url),
     pinned: Boolean(post.pinned),
     featured: Boolean(post.featured),
@@ -75,9 +76,16 @@ export async function onRequestGet(context) {
     const where = ["status = 'published'"];
     const binds = [];
 
-    if (category && CATEGORY_VALUES.has(category)) {
-      where.push('category = ?');
-      binds.push(category);
+    if (category) {
+      if (!CATEGORY_VALUES.has(category)) {
+        where.push('1 = 0');
+      } else if (category === 'company') {
+        where.push('category IN (?, ?)');
+        binds.push('company', 'product');
+      } else {
+        where.push('category = ?');
+        binds.push(category);
+      }
     }
 
     if (q) {

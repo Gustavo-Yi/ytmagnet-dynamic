@@ -20,8 +20,7 @@ const COUNTRY_META = {
 };
 
 const NEWS_CATEGORIES = [
-    { value: 'company', label: '公司动态' },
-    { value: 'product', label: '产品知识' },
+    { value: 'company', label: '公司新闻' },
     { value: 'industry', label: '行业资讯' },
 ];
 
@@ -153,6 +152,9 @@ const isSameDay = (value, date = new Date()) => {
 const normalizeNewsForm = (post = {}) => ({
     ...EMPTY_NEWS_FORM,
     ...post,
+    category: NEWS_CATEGORIES.some((category) => category.value === post.category)
+        ? post.category
+        : EMPTY_NEWS_FORM.category,
     pinned: Boolean(post.pinned),
     featured: Boolean(post.featured),
     published_at: post.published_at ? toDateTimeLocalInput(post.published_at) : '',
