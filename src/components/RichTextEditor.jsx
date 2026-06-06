@@ -4,6 +4,8 @@ import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
+import Color from '@tiptap/extension-color';
+import { TextStyle } from '@tiptap/extension-text-style';
 import { Table, TableCell, TableHeader, TableRow } from '@tiptap/extension-table';
 import Underline from '@tiptap/extension-underline';
 import './RichTextEditor.css';
@@ -36,6 +38,32 @@ function normalizeContent(value) {
     .join('');
 }
 
+function isValidTextColor(value) {
+  const color = String(value || '').trim();
+  if (!color || /[<>"'`;{}]/.test(color) || /(url|expression|var|calc|@|\\)/i.test(color)) {
+    return false;
+  }
+
+  if (/^#(?:[\da-f]{3}|[\da-f]{6})$/i.test(color)) return true;
+  if (/^rgba?\(\s*(?:\d{1,3}%?\s*,\s*){2}\d{1,3}%?(?:\s*,\s*(?:0?\.\d+|1(?:\.0+)?|0|[1-9]\d?%|100%))?\s*\)$/i.test(color)) {
+    return true;
+  }
+
+  return Boolean(window.CSS?.supports?.('color', color));
+}
+
+function colorToPickerValue(value, fallback = '#1c69d4') {
+  const color = String(value || '').trim();
+  if (/^#[\da-f]{6}$/i.test(color)) return color;
+
+  const shortHexMatch = color.match(/^#([\da-f])([\da-f])([\da-f])$/i);
+  if (shortHexMatch) {
+    return `#${shortHexMatch.slice(1).map((part) => part + part).join('')}`;
+  }
+
+  return fallback;
+}
+
 function ToolbarButton({ active = false, disabled = false, label, onClick, title }) {
   return (
     <button
@@ -64,7 +92,9 @@ export default function RichTextEditor({
   disabled = false,
 }) {
   const imageInputRef = useRef(null);
+  const colorInputRef = useRef(null);
   const [imageUploading, setImageUploading] = useState(false);
+  const [textColor, setTextColor] = useState('#1c69d4');
 
   const editor = useEditor({
     extensions: [
@@ -74,6 +104,10 @@ export default function RichTextEditor({
         },
       }),
       Underline,
+      TextStyle,
+      Color.configure({
+        types: ['textStyle'],
+      }),
       Link.configure({
         openOnClick: false,
         autolink: true,
@@ -163,6 +197,38 @@ export default function RichTextEditor({
     }
   }, [editor, onUploadImage]);
 
+  const applyTextColor = useCallback((color) => {
+    if (!editor) return;
+    const nextColor = String(color || '').trim();
+    if (!isValidTextColor(nextColor)) {
+      window.alert('请输入有效的颜色，例如 #1c69d4 或 rgb(28, 105, 212)');
+      return;
+    }
+
+    setTextColor(colorToPickerValue(nextColor, textColor));
+    editor.chain().focus().setColor(nextColor).run();
+  }, [editor, textColor]);
+
+  const openColorPicker = useCallback(() => {
+    if (!editor) return;
+    const currentColor = editor.getAttributes('textStyle').color;
+    setTextColor(colorToPickerValue(currentColor, textColor));
+    colorInputRef.current?.click();
+  }, [editor, textColor]);
+
+  const setTextColorByPrompt = useCallback(() => {
+    if (!editor) return;
+    const currentColor = editor.getAttributes('textStyle').color || textColor;
+    const color = window.prompt('请输入文字颜色，例如 #1c69d4 或 rgb(28, 105, 212)', currentColor);
+    if (color === null || !color.trim()) return;
+    applyTextColor(color);
+  }, [applyTextColor, editor, textColor]);
+
+  const clearTextColor = useCallback(() => {
+    if (!editor) return;
+    editor.chain().focus().unsetColor().run();
+  }, [editor]);
+
   if (!editor) {
     return (
       <div className="rich-editor-field">
@@ -219,6 +285,28 @@ export default function RichTextEditor({
             title="删除线"
             active={editor.isActive('strike')}
             onClick={() => editor.chain().focus().toggleStrike().run()}
+          />
+          <ToolbarButton
+            label={(
+              <span className="rich-editor-color-label">
+                <span className="rich-editor-color-swatch" style={{ backgroundColor: textColor }} aria-hidden="true" />
+                <span>色</span>
+              </span>
+            )}
+            title="选择文字颜色"
+            active={Boolean(editor.getAttributes('textStyle').color)}
+            onClick={openColorPicker}
+          />
+          <ToolbarButton
+            label="RGB"
+            title="输入 RGB 或 HEX 文字颜色"
+            onClick={setTextColorByPrompt}
+          />
+          <ToolbarButton
+            label="清色"
+            title="清除文字颜色"
+            disabled={!editor.getAttributes('textStyle').color}
+            onClick={clearTextColor}
           />
           <ToolbarDivider />
           <ToolbarButton
@@ -304,6 +392,13 @@ export default function RichTextEditor({
             type="file"
             accept="image/*"
             onChange={handleImageSelect}
+          />
+          <input
+            ref={colorInputRef}
+            className="rich-editor-color-input"
+            type="color"
+            value={textColor}
+            onChange={(event) => applyTextColor(event.target.value)}
           />
         </div>
         <EditorContent editor={editor} className="rich-editor-content" />

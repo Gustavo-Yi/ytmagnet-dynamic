@@ -84,6 +84,29 @@
   display: none;
 }
 
+.rich-editor-color-input {
+  width: 1px;
+  height: 1px;
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.rich-editor-color-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rich-editor-color-swatch {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+  border: 1px solid rgba(15, 23, 42, 0.18);
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.65);
+}
+
 .rich-editor-divider {
   width: 1px;
   height: 26px;

@@ -13,6 +13,57 @@ const CATEGORY_OPTIONS = [
 const FALLBACK_IMAGE = '/contact-bg.jpg';
 const CATEGORY_PAGE_SIZE = 6;
 const FEATURED_SLIDE_SIZE = 5;
+const RELATED_NEWS_LIMIT = 4;
+const LOCAL_PREVIEW_RELATED_NEWS = [
+  {
+    id: 'preview-related-ferrite-shapes',
+    slug: '',
+    category: 'company',
+    title_zh: '铁氧体磁铁常见形状与选型要点',
+    title_en: 'Common Ferrite Magnet Shapes and Selection Notes',
+    cover_image_url: '/uploads/news/ferrite-neodymium-magnets-cover.png',
+    cover_image_alt_zh: '铁氧体磁铁与钕铁硼磁铁产品展示',
+    cover_image_alt_en: 'Ferrite and neodymium magnet product display',
+    published_at: '2026-06-03T09:30:00+08:00',
+    isPreview: true,
+  },
+  {
+    id: 'preview-related-ndfeb-custom',
+    slug: '',
+    category: 'company',
+    title_zh: '钕铁硼磁铁定制中需要关注的尺寸与磁力',
+    title_en: 'Dimensions and Magnetic Force in NdFeB Magnet Customization',
+    cover_image_url: '/uploads/news/ferrite-neodymium-magnets-cover.png',
+    cover_image_alt_zh: '钕铁硼磁铁定制产品展示',
+    cover_image_alt_en: 'Custom neodymium magnet product display',
+    published_at: '2026-06-01T14:20:00+08:00',
+    isPreview: true,
+  },
+  {
+    id: 'preview-related-magnet-packaging',
+    slug: '',
+    category: 'company',
+    title_zh: '磁铁产品包装与批量交付的稳定性要求',
+    title_en: 'Packaging and Batch Delivery Requirements for Magnet Products',
+    cover_image_url: '/uploads/news/ferrite-neodymium-magnets-cover.png',
+    cover_image_alt_zh: '磁铁产品包装与供应展示',
+    cover_image_alt_en: 'Magnet product packaging and supply display',
+    published_at: '2026-05-28T10:10:00+08:00',
+    isPreview: true,
+  },
+  {
+    id: 'preview-related-magnet-applications',
+    slug: '',
+    category: 'company',
+    title_zh: '圆片、方块与圆环磁铁在产品开发中的应用',
+    title_en: 'Disc, Block and Ring Magnets in Product Development',
+    cover_image_url: '/uploads/news/ferrite-neodymium-magnets-cover.png',
+    cover_image_alt_zh: '多种形状磁铁产品展示',
+    cover_image_alt_en: 'Multiple magnet shapes product display',
+    published_at: '2026-05-22T11:00:00+08:00',
+    isPreview: true,
+  },
+];
 
 const COPY = {
   zh: {
@@ -32,6 +83,8 @@ const COPY = {
     notFound: '没有找到这篇新闻',
     notFoundText: '这篇新闻可能尚未发布，或链接别名已经变更。',
     related: '更多新闻',
+    recommended: '推荐阅读',
+    moreNews: '查看更多',
     category: '分类',
     publishedAt: '发布时间',
     previous: '上一页',
@@ -56,6 +109,8 @@ const COPY = {
     notFound: 'Article not found',
     notFoundText: 'This article may not be published yet, or its link alias has changed.',
     related: 'More News',
+    recommended: 'Recommended',
+    moreNews: 'View More',
     category: 'Category',
     publishedAt: 'Published',
     previous: 'Previous page',
@@ -199,6 +254,43 @@ function stripHtml(value) {
     .trim();
 }
 
+function getSafeTextColor(value) {
+  const color = String(value || '').trim();
+  if (!color || /[<>"'`;{}]/.test(color) || /(url|expression|var|calc|@|\\)/i.test(color)) {
+    return '';
+  }
+
+  const hexPattern = /^#(?:[\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})$/i;
+  const rgbPattern = /^rgba?\(\s*(?:\d{1,3}%?\s*,\s*){2}\d{1,3}%?(?:\s*,\s*(?:0?\.\d+|1(?:\.0+)?|0|[1-9]\d?%|100%))?\s*\)$/i;
+
+  if (hexPattern.test(color) || rgbPattern.test(color)) return color;
+  if (typeof window !== 'undefined' && window.CSS?.supports?.('color', color)) return color;
+  return '';
+}
+
+function getSafeColorStyle(style) {
+  const colorDeclaration = String(style || '')
+    .split(';')
+    .map((part) => part.trim())
+    .find((part) => /^color\s*:/i.test(part));
+
+  if (!colorDeclaration) return '';
+  const color = getSafeTextColor(colorDeclaration.replace(/^color\s*:/i, ''));
+  return color ? `color: ${color}` : '';
+}
+
+DOMPurify.addHook('uponSanitizeAttribute', (node, data) => {
+  if (data.attrName !== 'style') return;
+
+  const safeStyle = getSafeColorStyle(data.attrValue);
+  if (safeStyle) {
+    data.attrValue = safeStyle;
+    return;
+  }
+
+  data.keepAttr = false;
+});
+
 function buildArticleHtml(content) {
   const raw = String(content || '').trim();
   if (!raw) return '';
@@ -211,13 +303,13 @@ function buildArticleHtml(content) {
 
   return DOMPurify.sanitize(html, {
     ALLOWED_TAGS: [
-      'p', 'br', 'strong', 'b', 'em', 'i', 'u', 's',
+      'p', 'br', 'span', 'strong', 'b', 'em', 'i', 'u', 's',
       'h2', 'h3', 'h4', 'ul', 'ol', 'li', 'blockquote',
       'a', 'img', 'figure', 'figcaption',
       'table', 'thead', 'tbody', 'tr', 'th', 'td',
       'hr', 'code', 'pre',
     ],
-    ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'title', 'loading', 'colspan', 'rowspan', 'id'],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'title', 'loading', 'colspan', 'rowspan', 'id', 'style'],
   });
 }
 
@@ -261,7 +353,7 @@ function buildArticleWithToc(html) {
 
   const usedIds = new Set();
   const tocItems = [];
-  const headings = Array.from(container.querySelectorAll('h2, h3'));
+  const headings = Array.from(container.querySelectorAll('h2'));
 
   headings.forEach((heading) => {
     const text = heading.textContent.replace(/\s+/g, ' ').trim();
@@ -308,6 +400,44 @@ function sortPosts(posts, priorityFirst = false) {
 
     return new Date(getPostDate(right)).getTime() - new Date(getPostDate(left)).getTime();
   });
+}
+
+function uniquePosts(posts) {
+  const seen = new Set();
+  return posts.filter((post) => {
+    const key = post.slug || post.id;
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function pickRelatedPosts(posts, currentPost, limit = RELATED_NEWS_LIMIT) {
+  const candidates = (Array.isArray(posts) ? posts : [])
+    .filter((item) => item && item.slug !== currentPost?.slug && item.id !== currentPost?.id);
+
+  const sameCategory = sortPosts(candidates.filter((item) => item.category === currentPost?.category), true);
+  const featured = sortPosts(candidates.filter((item) => item.featured), true);
+  const latest = sortPosts(candidates, true);
+
+  return uniquePosts([...sameCategory, ...featured, ...latest]).slice(0, limit);
+}
+
+function isLocalPreviewHost() {
+  if (typeof window === 'undefined') return false;
+  return ['localhost', '127.0.0.1'].includes(window.location.hostname);
+}
+
+function fillLocalPreviewRelatedPosts(posts, currentPost, limit = RELATED_NEWS_LIMIT) {
+  const relatedPosts = Array.isArray(posts) ? posts : [];
+  if (!isLocalPreviewHost() || relatedPosts.length >= limit) {
+    return relatedPosts.slice(0, limit);
+  }
+
+  const previews = LOCAL_PREVIEW_RELATED_NEWS
+    .filter((item) => item.slug !== currentPost?.slug && item.id !== currentPost?.id);
+
+  return uniquePosts([...relatedPosts, ...previews]).slice(0, limit);
 }
 
 function getCircularWindow(items, start, size) {
@@ -460,6 +590,35 @@ function CategoryPostCard({ post, lang }) {
         <h3>{title}</h3>
         <time>{formatDate(getPostDate(post), lang)}</time>
       </div>
+    </Link>
+  );
+}
+
+function RecommendedNewsCard({ post, lang }) {
+  const title = getPostTitle(post, lang);
+  const cardContent = (
+    <>
+      <span className="news-recommendation-media">
+        <NewsImage post={post} lang={lang} />
+      </span>
+      <span className="news-recommendation-body">
+        <span className="news-recommendation-title">{title}</span>
+        <time dateTime={getPostDate(post)}>{formatDate(getPostDate(post), lang)}</time>
+      </span>
+    </>
+  );
+
+  if (post.isPreview || !post.slug) {
+    return (
+      <article className="news-recommendation-card is-preview">
+        {cardContent}
+      </article>
+    );
+  }
+
+  return (
+    <Link className="news-recommendation-card" to={`/news/${post.slug}`} aria-label={title}>
+      {cardContent}
     </Link>
   );
 }
@@ -715,7 +874,7 @@ function NewsDetailPage({ slug, lang }) {
       try {
         const [detailResponse, listResponse] = await Promise.all([
           fetch(`/api/news?slug=${encodeURIComponent(slug)}`),
-          fetch('/api/news?page=1&pageSize=4'),
+          fetch('/api/news?page=1&pageSize=30'),
         ]);
 
         const detailData = await detailResponse.json();
@@ -725,8 +884,13 @@ function NewsDetailPage({ slug, lang }) {
 
         const listData = await listResponse.json();
         if (alive) {
-          setPost(detailData.data);
-          setRelated((Array.isArray(listData.data) ? listData.data : []).filter((item) => item.slug !== slug).slice(0, 3));
+          const currentPost = detailData.data;
+          const relatedPosts = pickRelatedPosts(
+            Array.isArray(listData.data) ? listData.data : [],
+            currentPost,
+          );
+          setPost(currentPost);
+          setRelated(fillLocalPreviewRelatedPosts(relatedPosts, currentPost));
         }
       } catch (err) {
         if (alive) setError(err.message || copy.notFound);
@@ -791,6 +955,7 @@ function NewsDetailPage({ slug, lang }) {
   const detailTitle = post ? getPostTitle(post, lang) : '';
   const detailDate = post ? getPostDate(post) : '';
   const detailDateTime = post ? formatDateTime(detailDate) : '';
+  const hasRecommendations = related.length > 0;
 
   useEffect(() => {
     if (!showToc) {
@@ -838,7 +1003,7 @@ function NewsDetailPage({ slug, lang }) {
 
       {post && (
         <section className="news-article-shell">
-          <article className={`news-article${showToc ? ' has-toc' : ''}`}>
+          <article className={`news-article${showToc ? ' has-toc' : ''}${hasRecommendations ? ' has-recommendations' : ''}`}>
             {showToc && (
               <nav className="news-article-toc" aria-label={getTocTitle(lang)}>
                 <h2>{getTocTitle(lang)}</h2>
@@ -862,40 +1027,43 @@ function NewsDetailPage({ slug, lang }) {
               </nav>
             )}
             <div className="news-article-main">
-            <header className="news-article-header">
-              <Link className="news-article-back" to="/news">
-                <span aria-hidden="true">←</span>
-                <span>{copy.back}</span>
-              </Link>
-              <h1>{detailTitle}</h1>
-              <time className="news-article-time" dateTime={detailDate}>
-                <span className="news-article-time-icon" aria-hidden="true" />
-                <span>{detailDateTime}</span>
-              </time>
-            </header>
-            <img
-              className="news-article-cover"
-              src={post.cover_image_url || FALLBACK_IMAGE}
-              alt={getImageAlt(post, lang)}
-            />
-            <div className="news-article-body">
-              <div className="news-article-content">
-                <div dangerouslySetInnerHTML={{ __html: article.html }} />
+              <header className="news-article-header">
+                <Link className="news-article-back" to="/news">
+                  <span aria-hidden="true">←</span>
+                  <span>{copy.back}</span>
+                </Link>
+                <h1>{detailTitle}</h1>
+                <time className="news-article-time" dateTime={detailDate}>
+                  <span className="news-article-time-icon" aria-hidden="true" />
+                  <span>{detailDateTime}</span>
+                </time>
+              </header>
+              <img
+                className="news-article-cover"
+                src={post.cover_image_url || FALLBACK_IMAGE}
+                alt={getImageAlt(post, lang)}
+              />
+              <div className="news-article-body">
+                <div className="news-article-content">
+                  <div dangerouslySetInnerHTML={{ __html: article.html }} />
+                </div>
               </div>
             </div>
-            </div>
-          </article>
 
-          {related.length > 0 && (
-            <aside className="news-related">
-              <h2>{copy.related}</h2>
-              <div className="related-news-grid">
-                {related.map((item) => (
-                  <CategoryPostCard key={item.id} post={item} lang={lang} />
-                ))}
-              </div>
-            </aside>
-          )}
+            {hasRecommendations && (
+              <aside className="news-recommendations" aria-label={copy.recommended}>
+                <h2>{copy.recommended}</h2>
+                <div className="news-recommendation-list">
+                  {related.map((item) => (
+                    <RecommendedNewsCard key={item.id} post={item} lang={lang} />
+                  ))}
+                </div>
+                <Link className="news-recommendation-more" to="/news">
+                  <span>{copy.moreNews}</span>
+                </Link>
+              </aside>
+            )}
+          </article>
         </section>
       )}
     </main>
