@@ -69,10 +69,6 @@ function getCopy(lang) {
   return COPY[lang === 'zh' ? 'zh' : 'en'];
 }
 
-function getCategoryLabel(category, lang) {
-  return CATEGORY_OPTIONS.find((item) => item.value === category)?.[lang === 'zh' ? 'zh' : 'en'] || category || '-';
-}
-
 function getPostTitle(post, lang) {
   return (lang === 'zh' ? post.title_zh : post.title_en) || post.title_zh || post.title_en || '';
 }
@@ -104,6 +100,18 @@ function formatDate(value, lang) {
     month: '2-digit',
     day: '2-digit',
   });
+}
+
+function formatDateTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+
+  const pad = (part) => String(part).padStart(2, '0');
+  return [
+    date.getFullYear(),
+    pad(date.getMonth() + 1),
+    pad(date.getDate()),
+  ].join('-') + ` ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 function updateMeta(name, content) {
@@ -209,8 +217,83 @@ function buildArticleHtml(content) {
       'table', 'thead', 'tbody', 'tr', 'th', 'td',
       'hr', 'code', 'pre',
     ],
-    ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'title', 'loading', 'colspan', 'rowspan'],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'title', 'loading', 'colspan', 'rowspan', 'id'],
   });
+}
+
+function getTocTitle(lang) {
+  return lang === 'zh' ? '文章目录' : 'Article Contents';
+}
+
+function getUniqueTocId(base, usedIds) {
+  let id = String(base || '').trim().replace(/\s+/g, '-');
+  if (!id) id = 'section';
+
+  let uniqueId = id;
+  let count = 2;
+  while (usedIds.has(uniqueId)) {
+    uniqueId = `${id}-${count}`;
+    count += 1;
+  }
+
+  usedIds.add(uniqueId);
+  return uniqueId;
+}
+
+function createTocId(text, index, usedIds) {
+  const normalized = String(text || '')
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  return getUniqueTocId(normalized || `section-${index + 1}`, usedIds);
+}
+
+function buildArticleWithToc(html) {
+  if (!html || typeof document === 'undefined') {
+    return { html, tocItems: [] };
+  }
+
+  const container = document.createElement('div');
+  container.innerHTML = html;
+
+  const usedIds = new Set();
+  const tocItems = [];
+  const headings = Array.from(container.querySelectorAll('h2, h3'));
+
+  headings.forEach((heading) => {
+    const text = heading.textContent.replace(/\s+/g, ' ').trim();
+    if (!text) return;
+
+    const id = heading.id
+      ? getUniqueTocId(heading.id, usedIds)
+      : createTocId(text, tocItems.length, usedIds);
+
+    heading.id = id;
+    heading.tabIndex = -1;
+    tocItems.push({
+      id,
+      text,
+      level: heading.tagName.toLowerCase(),
+    });
+  });
+
+  return { html: container.innerHTML, tocItems };
+}
+
+function scrollToArticleSection(event, id) {
+  event.preventDefault();
+  const target = document.getElementById(id);
+  if (!target) return;
+
+  target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  target.focus({ preventScroll: true });
+
+  if (window.history?.replaceState) {
+    window.history.replaceState(null, '', `#${id}`);
+  }
 }
 
 function sortPosts(posts, priorityFirst = false) {
@@ -610,6 +693,12 @@ function NewsDetailPage({ slug, lang }) {
   const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeTocId, setActiveTocId] = useState('');
+
+  useEffect(() => {
+    document.body.classList.add('news-detail-page-mode');
+    return () => document.body.classList.remove('news-detail-page-mode');
+  }, []);
 
   const pageTitle = post
     ? ((lang === 'zh' ? post.seo_title_zh : post.seo_title_en) || getPostTitle(post, lang))
@@ -695,44 +784,105 @@ function NewsDetailPage({ slug, lang }) {
     });
   }, [lang, post]);
 
-  const articleHtml = post ? buildArticleHtml(getPostContent(post, lang)) : '';
+  const articleContent = post ? getPostContent(post, lang) : '';
+  const baseArticleHtml = useMemo(() => buildArticleHtml(articleContent), [articleContent]);
+  const article = useMemo(() => buildArticleWithToc(baseArticleHtml), [baseArticleHtml]);
+  const showToc = article.tocItems.length > 1;
+  const detailTitle = post ? getPostTitle(post, lang) : '';
+  const detailDate = post ? getPostDate(post) : '';
+  const detailDateTime = post ? formatDateTime(detailDate) : '';
+
+  useEffect(() => {
+    if (!showToc) {
+      setActiveTocId('');
+      return undefined;
+    }
+
+    setActiveTocId(article.tocItems[0].id);
+    const headings = article.tocItems
+      .map((item) => document.getElementById(item.id))
+      .filter(Boolean);
+
+    if (!headings.length) return undefined;
+
+    const observer = new IntersectionObserver((entries) => {
+      const visibleEntry = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((left, right) => left.boundingClientRect.top - right.boundingClientRect.top)[0];
+
+      if (visibleEntry?.target?.id) {
+        setActiveTocId(visibleEntry.target.id);
+      }
+    }, {
+      rootMargin: '-24% 0px -58% 0px',
+      threshold: [0, 1],
+    });
+
+    headings.forEach((heading) => observer.observe(heading));
+    return () => observer.disconnect();
+  }, [article.tocItems, showToc]);
 
   return (
     <main className={`news-page news-detail-page lang-${lang}`}>
-      <section className="news-detail-hero">
-        <div className="news-detail-hero-inner">
-          <Link className="news-back-link" to="/news">← {copy.back}</Link>
-          {post && (
-            <>
-              <span className="news-category-badge static">{getCategoryLabel(post.category, lang)}</span>
-              <h1>{getPostTitle(post, lang)}</h1>
-              <div className="news-detail-meta">
-                <span>{copy.publishedAt}</span>
-                <time>{formatDate(getPostDate(post), lang)}</time>
-              </div>
-              {getPostSummary(post, lang) && <p>{getPostSummary(post, lang)}</p>}
-            </>
-          )}
-          {loading && <div className="news-loading detail">{copy.loading}</div>}
+      {(loading || error) && (
+        <section className="news-article-shell news-detail-state-shell">
+          {loading && <div className="news-loading">{copy.loading}</div>}
           {error && (
-            <div className="news-detail-error">
+            <div className="news-error">
               <h1>{copy.notFound}</h1>
               <p>{copy.notFoundText}</p>
             </div>
           )}
-        </div>
-      </section>
+        </section>
+      )}
 
       {post && (
         <section className="news-article-shell">
-          <article className="news-article">
+          <article className={`news-article${showToc ? ' has-toc' : ''}`}>
+            {showToc && (
+              <nav className="news-article-toc" aria-label={getTocTitle(lang)}>
+                <h2>{getTocTitle(lang)}</h2>
+                <ol>
+                  {article.tocItems.map((item, index) => (
+                    <li key={item.id} className={`toc-${item.level}`}>
+                      <a
+                        className={activeTocId === item.id ? 'active' : ''}
+                        href={`#${item.id}`}
+                        onClick={(event) => {
+                          setActiveTocId(item.id);
+                          scrollToArticleSection(event, item.id);
+                        }}
+                      >
+                        <span className="toc-index">{String(index + 1).padStart(2, '0')}</span>
+                        <span className="toc-text">{item.text}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </nav>
+            )}
+            <div className="news-article-main">
+            <header className="news-article-header">
+              <Link className="news-article-back" to="/news">
+                <span aria-hidden="true">←</span>
+                <span>{copy.back}</span>
+              </Link>
+              <h1>{detailTitle}</h1>
+              <time className="news-article-time" dateTime={detailDate}>
+                <span className="news-article-time-icon" aria-hidden="true" />
+                <span>{detailDateTime}</span>
+              </time>
+            </header>
             <img
               className="news-article-cover"
               src={post.cover_image_url || FALLBACK_IMAGE}
               alt={getImageAlt(post, lang)}
             />
-            <div className="news-article-content">
-              <div dangerouslySetInnerHTML={{ __html: articleHtml }} />
+            <div className="news-article-body">
+              <div className="news-article-content">
+                <div dangerouslySetInnerHTML={{ __html: article.html }} />
+              </div>
+            </div>
             </div>
           </article>
 
