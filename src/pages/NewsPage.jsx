@@ -14,6 +14,73 @@ const FALLBACK_IMAGE = '/contact-bg.jpg';
 const CATEGORY_PAGE_SIZE = 6;
 const FEATURED_SLIDE_SIZE = 5;
 const RELATED_NEWS_LIMIT = 4;
+const ARTICLE_CONTACT_EMAIL = 'wangwu@yutongglobal.com';
+const ARTICLE_CONTACT_WHATSAPP = {
+  label: '+86 131 0749 7745',
+  href: 'https://wa.me/8613107497745',
+};
+const ARTICLE_SOCIAL_LOGOS = [
+  {
+    id: 'facebook',
+    name: 'Facebook',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <rect x="3" y="3" width="18" height="18" rx="2.4" />
+        <path fill="#fff" d="M14.1 8.8V7.55c0-.58.14-.9.93-.9h1.25V4.48a18.4 18.4 0 0 0-1.82-.09c-1.8 0-3.04 1.1-3.04 3.1V8.8H9.45v2.42h1.97v6.15h2.49v-6.15h2.05l.32-2.42h-2.18Z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'youtube',
+    name: 'YouTube',
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M21.58 7.18a2.74 2.74 0 0 0-1.93-1.94C17.95 4.8 12 4.8 12 4.8s-5.95 0-7.65.44a2.74 2.74 0 0 0-1.93 1.94A28.3 28.3 0 0 0 2 12a28.3 28.3 0 0 0 .42 4.82 2.74 2.74 0 0 0 1.93 1.94c1.7.44 7.65.44 7.65.44s5.95 0 7.65-.44a2.74 2.74 0 0 0 1.93-1.94A28.3 28.3 0 0 0 22 12a28.3 28.3 0 0 0-.42-4.82Z" />
+        <path fill="#fff" d="m10.05 15.18 5.13-3.18-5.13-3.18v6.36Z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'whatsapp',
+    name: 'WhatsApp',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'instagram',
+    name: 'Instagram',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="4" y="4" width="16" height="16" rx="5" stroke="currentColor" strokeWidth="2" />
+        <circle cx="12" cy="12" r="3.4" stroke="currentColor" strokeWidth="2" />
+        <circle cx="16.8" cy="7.2" r="1.1" fill="currentColor" />
+      </svg>
+    ),
+  },
+  {
+    id: 'linkedin',
+    name: 'LinkedIn',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <rect x="3" y="3" width="18" height="18" rx="2.4" />
+        <path fill="#fff" d="M8.1 10.1H5.8v7.35h2.3V10.1ZM6.95 8.88a1.34 1.34 0 1 0 0-2.68 1.34 1.34 0 0 0 0 2.68Zm10.02 8.57h2.3v-4.04c0-2.16-1.16-3.16-2.7-3.16-1.24 0-1.8.68-2.1 1.16v-1.3h-2.21c.03.68 0 7.34 0 7.34h2.3v-4.1c0-.22.02-.44.08-.6.18-.44.58-.9 1.25-.9.89 0 1.24.68 1.24 1.66v3.94Z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'wechat',
+    name: 'WeChat',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M9.6 4.2C5.75 4.2 2.6 6.7 2.6 9.78c0 1.78 1.05 3.34 2.68 4.36l-.58 2.05 2.38-1.24c.8.23 1.67.36 2.58.36.22 0 .44-.01.65-.03a5.28 5.28 0 0 1-.22-1.49c0-3.06 2.95-5.54 6.6-5.54.25 0 .5.01.74.04C16.84 5.78 13.86 4.2 9.6 4.2Zm-2.34 4.9a.82.82 0 1 1 0-1.64.82.82 0 0 1 0 1.64Zm4.8 0a.82.82 0 1 1 0-1.64.82.82 0 0 1 0 1.64Z" />
+        <path d="M16.68 9.55c-3.02 0-5.48 1.96-5.48 4.38 0 2.42 2.46 4.38 5.48 4.38.68 0 1.33-.1 1.92-.28l1.86.97-.45-1.6c1.26-.8 2.05-2.01 2.05-3.37 0-2.42-2.46-4.38-5.38-4.38Zm-1.78 3.36a.66.66 0 1 1 0-1.32.66.66 0 0 1 0 1.32Zm3.72 0a.66.66 0 1 1 0-1.32.66.66 0 0 1 0 1.32Z" />
+      </svg>
+    ),
+  },
+];
 const LOCAL_PREVIEW_RELATED_NEWS = [
   {
     id: 'preview-related-ferrite-shapes',
@@ -85,6 +152,10 @@ const COPY = {
     related: '更多新闻',
     recommended: '推荐阅读',
     moreNews: '查看更多',
+    contactEmail: '电子邮件',
+    contactWhatsApp: 'WhatsApp',
+    contactEmailLabel: '发送邮件至',
+    contactWhatsAppLabel: '通过 WhatsApp 联系',
     category: '分类',
     publishedAt: '发布时间',
     previous: '上一页',
@@ -111,6 +182,10 @@ const COPY = {
     related: 'More News',
     recommended: 'Recommended',
     moreNews: 'View More',
+    contactEmail: 'Email',
+    contactWhatsApp: 'WhatsApp',
+    contactEmailLabel: 'Send email to',
+    contactWhatsAppLabel: 'Contact on WhatsApp',
     category: 'Category',
     publishedAt: 'Published',
     previous: 'Previous page',
@@ -623,6 +698,68 @@ function RecommendedNewsCard({ post, lang }) {
   );
 }
 
+function ArticleCoverSocials() {
+  return (
+    <div className="news-cover-socials" aria-label="Social media">
+      {ARTICLE_SOCIAL_LOGOS.map((item) => (
+        <span
+          key={item.id}
+          className={`news-cover-social-logo is-${item.id}`}
+          title={item.name}
+          aria-label={item.name}
+          role="img"
+        >
+          <span className="news-cover-social-icon is-base">{item.icon}</span>
+          <span className="news-cover-social-icon is-hover" aria-hidden="true">
+            {item.icon}
+          </span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function ArticleContactCard({ lang }) {
+  const copy = getCopy(lang);
+
+  return (
+    <section className="news-article-contact" aria-label={`${copy.contactEmail} / ${copy.contactWhatsApp}`}>
+      <div className="news-article-contact-links">
+        <a
+          className="news-article-contact-link is-email"
+          href={`mailto:${ARTICLE_CONTACT_EMAIL}`}
+          aria-label={`${copy.contactEmailLabel} ${ARTICLE_CONTACT_EMAIL}`}
+        >
+          <span className="news-article-contact-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2.75" y="5" width="18.5" height="14" rx="2.5" />
+              <path d="m21 7.5-7.95 5.05a2 2 0 0 1-2.1 0L3 7.5" />
+            </svg>
+          </span>
+          <span className="news-article-contact-label">{copy.contactEmail}</span>
+          <span className="news-article-contact-value">{ARTICLE_CONTACT_EMAIL}</span>
+        </a>
+
+        <a
+          className="news-article-contact-link is-whatsapp"
+          href={ARTICLE_CONTACT_WHATSAPP.href}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={`${copy.contactWhatsAppLabel} ${ARTICLE_CONTACT_WHATSAPP.label}`}
+        >
+          <span className="news-article-contact-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+            </svg>
+          </span>
+          <span className="news-article-contact-label">{copy.contactWhatsApp}</span>
+          <span className="news-article-contact-value">{ARTICLE_CONTACT_WHATSAPP.label}</span>
+        </a>
+      </div>
+    </section>
+  );
+}
+
 function NewsListPage({ lang }) {
   const copy = getCopy(lang);
   const [posts, setPosts] = useState([]);
@@ -1043,11 +1180,13 @@ function NewsDetailPage({ slug, lang }) {
                 src={post.cover_image_url || FALLBACK_IMAGE}
                 alt={getImageAlt(post, lang)}
               />
+              <ArticleCoverSocials />
               <div className="news-article-body">
                 <div className="news-article-content">
                   <div dangerouslySetInnerHTML={{ __html: article.html }} />
                 </div>
               </div>
+              <ArticleContactCard lang={lang} />
             </div>
 
             {hasRecommendations && (

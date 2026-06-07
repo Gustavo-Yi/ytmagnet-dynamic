@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './FloatingContact.css';
 
 const WHATSAPP_NUMBER = '8613107497745';
-const EMAIL = 'yiyi@yutongglobal.com';
+const EMAIL = 'wangwu@yutongglobal.com';
 
 function FloatingContact() {
   const [activeTooltip, setActiveTooltip] = useState(null);

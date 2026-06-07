@@ -5,7 +5,7 @@ import ContactForm from '../components/ContactForm';
 import './ContactPage.css';
 
 const WHATSAPP_NUMBER = '8613107497745';
-const EMAIL = 'yiyi@yutongglobal.com';
+const EMAIL = 'wangwu@yutongglobal.com';
 
 function ContactPage() {
   const { t, lang } = useLanguage();
