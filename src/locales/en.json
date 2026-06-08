@@ -14,11 +14,16 @@
     "home": "Home",
     "about": "About Us",
     "products": "Products",
-    "news": "News",
+    "news": "Updates",
     "contact": "Contact",
     "products_sub": {
       "ferrite": "Ferrite Magnets",
       "ndfeb": "NdFeB Magnets"
+    },
+    "news_sub": {
+      "company": "Company News",
+      "industry": "Industry News",
+      "faq": "FAQ"
     }
   },
   "home": {

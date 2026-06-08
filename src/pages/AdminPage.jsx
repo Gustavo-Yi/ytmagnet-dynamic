@@ -22,6 +22,7 @@ const COUNTRY_META = {
 const NEWS_CATEGORIES = [
     { value: 'company', label: '公司新闻' },
     { value: 'industry', label: '行业资讯' },
+    { value: 'faq', label: '常见问题' },
 ];
 
 const NEWS_STATUS = [

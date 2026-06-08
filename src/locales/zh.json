@@ -14,11 +14,16 @@
     "home": "首页",
     "about": "关于我们",
     "products": "产品中心",
-    "news": "新闻中心",
+    "news": "动态资讯",
     "contact": "联系我们",
     "products_sub": {
       "ferrite": "铁氧体",
       "ndfeb": "钕铁硼"
+    },
+    "news_sub": {
+      "company": "公司新闻",
+      "industry": "行业资讯",
+      "faq": "常见问题"
     }
   },
   "home": {

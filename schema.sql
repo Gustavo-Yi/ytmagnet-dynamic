@@ -25,7 +25,7 @@ CREATE TABLE rate_limits (
 CREATE TABLE news_posts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     slug TEXT NOT NULL UNIQUE,
-    category TEXT NOT NULL CHECK (category IN ('company', 'industry')),
+    category TEXT NOT NULL CHECK (category IN ('company', 'industry', 'faq')),
     status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
     title_zh TEXT NOT NULL,
     title_en TEXT,

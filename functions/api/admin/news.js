@@ -5,7 +5,7 @@ const CORS_HEADERS = {
   'Content-Type': 'application/json',
 };
 
-const CATEGORY_VALUES = new Set(['company', 'industry']);
+const CATEGORY_VALUES = new Set(['company', 'industry', 'faq']);
 const STATUS_VALUES = new Set(['draft', 'published']);
 
 function json(data, status = 200) {
@@ -117,7 +117,7 @@ function buildPostInput(body, existing, request, env) {
     40
   );
   if (!CATEGORY_VALUES.has(category)) {
-    return { error: 'category must be company or industry.' };
+    return { error: 'category must be company, industry, or faq.' };
   }
 
   const status = text(body.status, existing?.status || 'draft', 40);

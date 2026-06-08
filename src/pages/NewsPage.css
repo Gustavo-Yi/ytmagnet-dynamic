@@ -236,6 +236,25 @@ body.news-detail-page-mode .main-header.header-subpage .lang-option.active {
   text-decoration: none;
 }
 
+.split-text-reveal {
+  display: inline-block;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.split-line,
+.split-word,
+.split-char {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.featured-hero-title-link,
+.featured-hero-summary-text {
+  color: inherit;
+}
+
 .featured-hero-overlay p {
   max-width: min(100%, 900px);
   margin: 18px 0 0;

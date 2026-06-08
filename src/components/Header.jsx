@@ -48,8 +48,13 @@ const Header = () => {
               <li><Link to="/products/ndfeb">{t('nav.products_sub.ndfeb')}</Link></li>
             </ul>
           </li>
-          <li className="nav-item-box">
+          <li className="nav-item-box has-dropdown">
             <Link to="/news">{t('nav.news')}</Link>
+            <ul className="dropdown">
+              <li><Link to="/news?category=company">{t('nav.news_sub.company')}</Link></li>
+              <li><Link to="/news?category=industry">{t('nav.news_sub.industry')}</Link></li>
+              <li><Link to="/news?category=faq">{t('nav.news_sub.faq')}</Link></li>
+            </ul>
           </li>
           <li className="nav-item-box">
             <Link to="/contact">{t('nav.contact')}</Link>

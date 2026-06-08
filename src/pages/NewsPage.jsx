@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import DOMPurify from 'dompurify';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import SplitTextReveal from '../components/SplitTextReveal';
 import usePageTitle from '../hooks/usePageTitle';
 import { useLanguage } from '../context/LanguageContext';
 import './NewsPage.css';
@@ -8,7 +9,9 @@ import './NewsPage.css';
 const CATEGORY_OPTIONS = [
   { value: 'company', zh: '公司新闻', en: 'Company News' },
   { value: 'industry', zh: '行业资讯', en: 'Industry News' },
+  { value: 'faq', zh: '常见问题', en: 'FAQ' },
 ];
+const DEFAULT_CATEGORY = 'company';
 
 const FALLBACK_IMAGE = '/contact-bg.jpg';
 const CATEGORY_PAGE_SIZE = 6;
@@ -197,6 +200,14 @@ const COPY = {
 
 function getCopy(lang) {
   return COPY[lang === 'zh' ? 'zh' : 'en'];
+}
+
+function normalizeCategory(value) {
+  return CATEGORY_OPTIONS.some((category) => category.value === value) ? value : DEFAULT_CATEGORY;
+}
+
+function getCategoryFromSearch(search) {
+  return normalizeCategory(new URLSearchParams(search).get('category') || DEFAULT_CATEGORY);
 }
 
 function getPostTitle(post, lang) {
@@ -608,9 +619,31 @@ function FeaturedHeroCard({ post, lang, copy }) {
       </Link>
       <div className="featured-hero-overlay">
         <h2>
-          <Link to={`/news/${post.slug}`}>{title}</Link>
+          <SplitTextReveal
+            as={Link}
+            to={`/news/${post.slug}`}
+            text={title}
+            className="featured-hero-title-link"
+            splitType="chars"
+            delay={30}
+            startDelay={0.18}
+            duration={1.05}
+            fromY={58}
+          />
         </h2>
-        {summary && <p>{summary}</p>}
+        {summary && (
+          <p>
+            <SplitTextReveal
+              text={summary}
+              className="featured-hero-summary-text"
+              splitType="chars"
+              delay={11}
+              startDelay={0.72}
+              duration={0.85}
+              fromY={24}
+            />
+          </p>
+        )}
         <Link
           className="news-primary-link magnetic-control"
           to={`/news/${post.slug}`}
@@ -762,10 +795,12 @@ function ArticleContactCard({ lang }) {
 
 function NewsListPage({ lang }) {
   const copy = getCopy(lang);
+  const location = useLocation();
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeCategory, setActiveCategory] = useState('company');
+  const [activeCategory, setActiveCategory] = useState(() => getCategoryFromSearch(location.search));
   const [page, setPage] = useState(1);
   const [featuredOffset, setFeaturedOffset] = useState(0);
   const [featuredDirection, setFeaturedDirection] = useState('next');
@@ -775,6 +810,10 @@ function NewsListPage({ lang }) {
   useEffect(() => {
     updateMeta('description', copy.heroText);
   }, [copy.heroText]);
+
+  useEffect(() => {
+    setActiveCategory(getCategoryFromSearch(location.search));
+  }, [location.search]);
 
   useEffect(() => {
     let alive = true;
@@ -838,6 +877,12 @@ function NewsListPage({ lang }) {
   useEffect(() => {
     setFeaturedOffset(0);
   }, [featuredRailPosts.length]);
+
+  function selectCategory(category) {
+    const nextCategory = normalizeCategory(category);
+    setActiveCategory(nextCategory);
+    navigate(`/news?category=${nextCategory}`);
+  }
 
   function moveFeaturedRail(direction) {
     if (featuredRailPosts.length <= 1) return;
@@ -918,7 +963,7 @@ function NewsListPage({ lang }) {
                     type="button"
                     className={activeCategory === category.value ? 'active' : ''}
                     style={{ '--tab-index': index }}
-                    onClick={() => setActiveCategory(category.value)}
+                    onClick={() => selectCategory(category.value)}
                     onPointerMove={handleMagneticPointer}
                     onPointerLeave={resetMagneticPointer}
                   >

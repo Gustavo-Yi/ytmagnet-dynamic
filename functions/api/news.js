@@ -5,7 +5,7 @@ const CORS_HEADERS = {
   'Content-Type': 'application/json',
 };
 
-const CATEGORY_VALUES = new Set(['company', 'industry']);
+const CATEGORY_VALUES = new Set(['company', 'industry', 'faq']);
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: CORS_HEADERS });
