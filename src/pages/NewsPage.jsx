@@ -1,10 +1,14 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import DOMPurify from 'dompurify';
+import { gsap } from 'gsap';
+import { Flip } from 'gsap/Flip';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import SplitTextReveal from '../components/SplitTextReveal';
 import usePageTitle from '../hooks/usePageTitle';
 import { useLanguage } from '../context/LanguageContext';
 import './NewsPage.css';
+
+gsap.registerPlugin(Flip);
 
 const CATEGORY_OPTIONS = [
   { value: 'company', zh: '公司新闻', en: 'Company News' },
@@ -15,7 +19,8 @@ const DEFAULT_CATEGORY = 'company';
 
 const FALLBACK_IMAGE = '/contact-bg.jpg';
 const CATEGORY_PAGE_SIZE = 6;
-const FEATURED_SLIDE_SIZE = 5;
+const FEATURED_TOTAL_LIMIT = 5;
+const FEATURED_VISIBLE_COUNT = 4;
 const RELATED_NEWS_LIMIT = 4;
 const ARTICLE_CONTACT_EMAIL = 'wangwu@yutongglobal.com';
 const ARTICLE_CONTACT_WHATSAPP = {
@@ -514,6 +519,11 @@ function isLocalPreviewHost() {
   return ['localhost', '127.0.0.1'].includes(window.location.hostname);
 }
 
+function prefersReducedMotion() {
+  return typeof window !== 'undefined'
+    && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+}
+
 function fillLocalPreviewRelatedPosts(posts, currentPost, limit = RELATED_NEWS_LIMIT) {
   const relatedPosts = Array.isArray(posts) ? posts : [];
   if (!isLocalPreviewHost() || relatedPosts.length >= limit) {
@@ -531,6 +541,14 @@ function getCircularWindow(items, start, size) {
   return Array.from({ length: count }, (_, index) => items[(start + index) % items.length]);
 }
 
+function getNextCircularIndex(current, direction, total) {
+  if (total <= 0) return 0;
+  const next = current + direction;
+  if (next < 0) return total - 1;
+  if (next >= total) return 0;
+  return next;
+}
+
 function getPaginationItems(current, total) {
   if (total <= 7) {
     return Array.from({ length: total }, (_, index) => index + 1);
@@ -546,33 +564,6 @@ function getPaginationItems(current, total) {
   pages.push(total);
 
   return pages;
-}
-
-function handlePointerGlow(event) {
-  const target = event.currentTarget;
-  const rect = target.getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const y = event.clientY - rect.top;
-  const xRatio = x / rect.width - 0.5;
-  const yRatio = y / rect.height - 0.5;
-
-  target.style.setProperty('--pointer-x', `${x}px`);
-  target.style.setProperty('--pointer-y', `${y}px`);
-  target.style.setProperty('--tilt-x', `${(-yRatio * 3.6).toFixed(2)}deg`);
-  target.style.setProperty('--tilt-y', `${(xRatio * 3.6).toFixed(2)}deg`);
-  target.style.setProperty('--image-shift-x', `${(xRatio * 8).toFixed(2)}px`);
-  target.style.setProperty('--image-shift-y', `${(yRatio * 8).toFixed(2)}px`);
-}
-
-function resetPointerGlow(event) {
-  const target = event.currentTarget;
-
-  target.style.setProperty('--pointer-x', '50%');
-  target.style.setProperty('--pointer-y', '50%');
-  target.style.setProperty('--tilt-x', '0deg');
-  target.style.setProperty('--tilt-y', '0deg');
-  target.style.setProperty('--image-shift-x', '0px');
-  target.style.setProperty('--image-shift-y', '0px');
 }
 
 function handleMagneticPointer(event) {
@@ -657,47 +648,51 @@ function FeaturedHeroCard({ post, lang, copy }) {
   );
 }
 
-function FeaturedRailCard({ post, lang }) {
+function FeaturedRailCard({ post, lang, copy, phase = 'visible' }) {
   const title = getPostTitle(post, lang);
   const summary = getPostSummary(post, lang);
+  const phaseClass = phase && phase !== 'visible' ? ` is-${phase}` : '';
 
   return (
     <article
-      className="featured-rail-card interactive-glow-card"
-      onPointerMove={handlePointerGlow}
-      onPointerLeave={resetPointerGlow}
+      className={`featured-rail-card news-cover-hover-card${phaseClass}`}
+      data-rail-phase={phase}
+      data-flip-id={`featured-news-${post.id}`}
     >
-      <Link className="featured-rail-media" to={`/news/${post.slug}`} aria-label={title}>
-        <NewsImage post={post} lang={lang} />
+      <Link className="news-cover-hover-link" to={`/news/${post.slug}`} aria-label={title}>
+        <span className="featured-rail-media news-cover-hover-media">
+          <NewsImage post={post} lang={lang} />
+        </span>
+        <span className="news-cover-hover-shade" aria-hidden="true" />
+        <span className="featured-rail-body news-cover-hover-content">
+          <span className="news-cover-hover-title">{title}</span>
+          {summary && <span className="news-cover-hover-summary">{summary}</span>}
+          <span className="news-cover-hover-cta">{copy.readNow}</span>
+        </span>
       </Link>
-      <div className="featured-rail-body">
-        <h3>
-          <Link to={`/news/${post.slug}`}>{title}</Link>
-        </h3>
-        {summary && <p>{summary}</p>}
-      </div>
     </article>
   );
 }
 
-function CategoryPostCard({ post, lang }) {
+function CategoryPostCard({ post, lang, copy }) {
   const title = getPostTitle(post, lang);
+  const summary = getPostSummary(post, lang);
 
   return (
     <Link
-      className="category-news-card interactive-glow-card"
+      className="category-news-card news-cover-hover-card"
       to={`/news/${post.slug}`}
       aria-label={title}
-      onPointerMove={handlePointerGlow}
-      onPointerLeave={resetPointerGlow}
     >
-      <div className="category-news-media">
+      <span className="category-news-media news-cover-hover-media">
         <NewsImage post={post} lang={lang} />
-      </div>
-      <div className="category-news-body">
-        <h3>{title}</h3>
-        <time>{formatDate(getPostDate(post), lang)}</time>
-      </div>
+      </span>
+      <span className="news-cover-hover-shade" aria-hidden="true" />
+      <span className="category-news-body news-cover-hover-content">
+        <span className="news-cover-hover-title">{title}</span>
+        {summary && <span className="news-cover-hover-summary">{summary}</span>}
+        <span className="news-cover-hover-cta">{copy.readNow}</span>
+      </span>
     </Link>
   );
 }
@@ -803,7 +798,12 @@ function NewsListPage({ lang }) {
   const [activeCategory, setActiveCategory] = useState(() => getCategoryFromSearch(location.search));
   const [page, setPage] = useState(1);
   const [featuredOffset, setFeaturedOffset] = useState(0);
+  const [featuredTransition, setFeaturedTransition] = useState(null);
   const [featuredDirection, setFeaturedDirection] = useState('next');
+  const featuredRailRef = useRef(null);
+  const featuredFlipStateRef = useRef(null);
+  const featuredDirectionRef = useRef('next');
+  const featuredFlipTweenRef = useRef(null);
 
   usePageTitle(copy.listTitle);
 
@@ -857,7 +857,7 @@ function NewsListPage({ lang }) {
   const featuredRailPosts = useMemo(() => {
     return sortedPosts
       .filter((post) => post.featured && post.id !== heroPost?.id)
-      .slice(0, FEATURED_SLIDE_SIZE);
+      .slice(0, FEATURED_TOTAL_LIMIT);
   }, [heroPost?.id, sortedPosts]);
 
   const activeCategoryPosts = useMemo(
@@ -868,7 +868,10 @@ function NewsListPage({ lang }) {
   const totalPages = Math.max(1, Math.ceil(activeCategoryPosts.length / CATEGORY_PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const pagePosts = activeCategoryPosts.slice((safePage - 1) * CATEGORY_PAGE_SIZE, safePage * CATEGORY_PAGE_SIZE);
-  const railPosts = getCircularWindow(featuredRailPosts, featuredOffset, FEATURED_SLIDE_SIZE);
+  const committedRailPosts = getCircularWindow(featuredRailPosts, featuredOffset, FEATURED_VISIBLE_COUNT);
+  const railItems = featuredTransition?.items
+    || committedRailPosts.map((post) => ({ post, phase: 'visible' }));
+  const featuredRailCanSlide = featuredRailPosts.length > FEATURED_VISIBLE_COUNT;
 
   useEffect(() => {
     setPage(1);
@@ -876,7 +879,84 @@ function NewsListPage({ lang }) {
 
   useEffect(() => {
     setFeaturedOffset(0);
+    setFeaturedTransition(null);
   }, [featuredRailPosts.length]);
+
+  useLayoutEffect(() => {
+    const state = featuredFlipStateRef.current;
+    const rail = featuredRailRef.current;
+    const transition = featuredTransition;
+
+    if (!state || !rail || !transition) return;
+
+    featuredFlipStateRef.current = null;
+
+    const direction = featuredDirectionRef.current;
+    const reducedMotion = prefersReducedMotion();
+    const enterOrigin = direction === 'next' ? 'bottom right' : 'bottom left';
+    const leaveOrigin = direction === 'next' ? 'bottom left' : 'bottom right';
+    const currentCards = rail.querySelectorAll('.featured-rail-card');
+    const enteringCards = rail.querySelectorAll('.featured-rail-card.is-entering');
+    const clearAnimatedCardProps = () => {
+      gsap.set(rail.querySelectorAll('.featured-rail-card'), {
+        clearProps: 'transform,opacity,visibility,filter,rotate,scale,x,y,zIndex,transformOrigin,width,height,maxWidth,maxHeight,minWidth,minHeight,position,top,left',
+      });
+      rail.classList.remove('is-flipping');
+    };
+
+    rail.classList.add('is-flipping');
+    gsap.set(enteringCards, {
+      autoAlpha: 0,
+      scale: 0,
+      transformOrigin: enterOrigin,
+    });
+
+    const flipTween = Flip.from(state, {
+      absoluteOnLeave: true,
+      duration: reducedMotion ? 0.46 : 0.56,
+      ease: 'power1.inOut',
+      fade: true,
+      targets: currentCards,
+      nested: true,
+      prune: true,
+      onEnter: (elements) => {
+        gsap.to(elements, {
+          autoAlpha: 1,
+          scale: 1,
+          transformOrigin: enterOrigin,
+          duration: reducedMotion ? 0.42 : 0.5,
+          ease: 'power1.out',
+        });
+      },
+      onLeave: (elements) => {
+        gsap.to(elements, {
+          autoAlpha: 0,
+          scale: 0,
+          transformOrigin: leaveOrigin,
+          duration: reducedMotion ? 0.42 : 0.5,
+          ease: 'power1.out',
+        });
+      },
+      onComplete: () => {
+        clearAnimatedCardProps();
+        if (featuredFlipTweenRef.current === flipTween) {
+          featuredFlipTweenRef.current = null;
+        }
+        setFeaturedOffset(transition.nextOffset);
+        setFeaturedTransition(null);
+      },
+    });
+
+    featuredFlipTweenRef.current = flipTween;
+
+    return () => {
+      if (featuredFlipTweenRef.current === flipTween) {
+        flipTween.kill();
+        featuredFlipTweenRef.current = null;
+        clearAnimatedCardProps();
+      }
+    };
+  }, [featuredTransition]);
 
   function selectCategory(category) {
     const nextCategory = normalizeCategory(category);
@@ -885,13 +965,45 @@ function NewsListPage({ lang }) {
   }
 
   function moveFeaturedRail(direction) {
-    if (featuredRailPosts.length <= 1) return;
-    setFeaturedDirection(direction > 0 ? 'next' : 'previous');
-    setFeaturedOffset((current) => {
-      const next = current + direction;
-      if (next < 0) return featuredRailPosts.length - 1;
-      if (next >= featuredRailPosts.length) return 0;
-      return next;
+    if (!featuredRailCanSlide || featuredTransition) return;
+    const nextDirection = direction > 0 ? 'next' : 'previous';
+    const rail = featuredRailRef.current;
+
+    if (featuredFlipTweenRef.current) {
+      featuredFlipTweenRef.current.progress(1).kill();
+      featuredFlipTweenRef.current = null;
+      if (rail) {
+        gsap.set(rail.querySelectorAll('.featured-rail-card'), {
+          clearProps: 'transform,opacity,visibility,filter,rotate,scale,x,y,zIndex,transformOrigin,width,height,maxWidth,maxHeight,minWidth,minHeight,position,top,left',
+        });
+        rail.classList.remove('is-flipping');
+      }
+    }
+
+    if (rail) {
+      featuredFlipStateRef.current = Flip.getState(rail.querySelectorAll('.featured-rail-card'));
+    }
+
+    const nextOffset = getNextCircularIndex(featuredOffset, direction, featuredRailPosts.length);
+    const nextRailPosts = getCircularWindow(featuredRailPosts, nextOffset, FEATURED_VISIBLE_COUNT);
+    const currentIds = new Set(committedRailPosts.map((post) => post.id));
+    const nextItems = nextRailPosts.map((post) => ({
+      post,
+      phase: currentIds.has(post.id) ? 'staying' : 'entering',
+    }));
+    const leavingPost = direction > 0
+      ? committedRailPosts[0]
+      : committedRailPosts[committedRailPosts.length - 1];
+    const transitionItems = direction > 0
+      ? [{ post: leavingPost, phase: 'leaving' }, ...nextItems]
+      : [...nextItems, { post: leavingPost, phase: 'leaving' }];
+
+    featuredDirectionRef.current = nextDirection;
+    setFeaturedDirection(nextDirection);
+    setFeaturedTransition({
+      direction: nextDirection,
+      items: transitionItems,
+      nextOffset,
     });
   }
 
@@ -906,7 +1018,7 @@ function NewsListPage({ lang }) {
 
         {!loading && !error && heroPost && <FeaturedHeroCard post={heroPost} lang={lang} copy={copy} />}
 
-        {!loading && !error && heroPost && railPosts.length > 0 && (
+        {!loading && !error && heroPost && railItems.length > 0 && (
           <div className="news-section-inner">
             <div className="featured-rail-shell">
               <h2 className="featured-rail-heading">{copy.featuredTitle}</h2>
@@ -914,25 +1026,32 @@ function NewsListPage({ lang }) {
                 className="featured-arrow previous magnetic-control"
                 type="button"
                 aria-label={copy.carouselPrev}
-                disabled={featuredRailPosts.length <= 1}
+                disabled={!featuredRailCanSlide}
                 onClick={() => moveFeaturedRail(-1)}
                 onPointerMove={handleMagneticPointer}
                 onPointerLeave={resetMagneticPointer}
               />
               <div
-                key={featuredOffset}
+                ref={featuredRailRef}
                 className={`featured-rail is-moving-${featuredDirection}`}
+                data-featured-direction={featuredDirection}
                 aria-live="polite"
               >
-                {railPosts.map((post) => (
-                  <FeaturedRailCard key={post.id} post={post} lang={lang} />
+                {railItems.map((item) => (
+                  <FeaturedRailCard
+                    key={item.post.id}
+                    post={item.post}
+                    lang={lang}
+                    copy={copy}
+                    phase={item.phase}
+                  />
                 ))}
               </div>
               <button
                 className="featured-arrow next magnetic-control"
                 type="button"
                 aria-label={copy.carouselNext}
-                disabled={featuredRailPosts.length <= 1}
+                disabled={!featuredRailCanSlide}
                 onClick={() => moveFeaturedRail(1)}
                 onPointerMove={handleMagneticPointer}
                 onPointerLeave={resetMagneticPointer}
@@ -977,7 +1096,7 @@ function NewsListPage({ lang }) {
               <>
                 <div key={`${activeCategory}-${safePage}`} className="category-news-grid">
                   {pagePosts.map((post) => (
-                    <CategoryPostCard key={post.id} post={post} lang={lang} />
+                    <CategoryPostCard key={post.id} post={post} lang={lang} copy={copy} />
                   ))}
                 </div>
 
