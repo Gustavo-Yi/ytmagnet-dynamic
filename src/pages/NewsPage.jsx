@@ -11,11 +11,12 @@ import './NewsPage.css';
 gsap.registerPlugin(Flip);
 
 const CATEGORY_OPTIONS = [
+  { value: 'latest', zh: '\u6700\u65b0\u6d88\u606f', en: 'Latest News' },
   { value: 'company', zh: '公司新闻', en: 'Company News' },
   { value: 'industry', zh: '行业资讯', en: 'Industry News' },
   { value: 'faq', zh: '常见问题', en: 'FAQ' },
 ];
-const DEFAULT_CATEGORY = 'company';
+const DEFAULT_CATEGORY = 'latest';
 
 const FALLBACK_IMAGE = '/contact-bg.jpg';
 const CATEGORY_PAGE_SIZE = 6;
@@ -159,6 +160,7 @@ const COPY = {
     notFoundText: '这篇新闻可能尚未发布，或链接别名已经变更。',
     related: '更多新闻',
     recommended: '推荐阅读',
+    listRecommended: '推荐新闻',
     moreNews: '查看更多',
     contactEmail: '电子邮件',
     contactWhatsApp: 'WhatsApp',
@@ -189,6 +191,7 @@ const COPY = {
     notFoundText: 'This article may not be published yet, or its link alias has changed.',
     related: 'More News',
     recommended: 'Recommended',
+    listRecommended: 'Recommended News',
     moreNews: 'View More',
     contactEmail: 'Email',
     contactWhatsApp: 'WhatsApp',
@@ -566,7 +569,7 @@ function getPaginationItems(current, total) {
   return pages;
 }
 
-function handleMagneticPointer(event) {
+function handlePointerGlow(event) {
   const target = event.currentTarget;
   const rect = target.getBoundingClientRect();
   const x = event.clientX - rect.left;
@@ -576,17 +579,36 @@ function handleMagneticPointer(event) {
 
   target.style.setProperty('--pointer-x', `${x}px`);
   target.style.setProperty('--pointer-y', `${y}px`);
-  target.style.setProperty('--magnet-x', `${(xRatio * 8).toFixed(2)}px`);
-  target.style.setProperty('--magnet-y', `${(yRatio * 8).toFixed(2)}px`);
+  target.style.setProperty('--tilt-x', `${(-yRatio * 3.6).toFixed(2)}deg`);
+  target.style.setProperty('--tilt-y', `${(xRatio * 3.6).toFixed(2)}deg`);
+  target.style.setProperty('--image-shift-x', `${(xRatio * 8).toFixed(2)}px`);
+  target.style.setProperty('--image-shift-y', `${(yRatio * 8).toFixed(2)}px`);
 }
 
-function resetMagneticPointer(event) {
+function resetPointerGlow(event) {
   const target = event.currentTarget;
 
   target.style.setProperty('--pointer-x', '50%');
   target.style.setProperty('--pointer-y', '50%');
-  target.style.setProperty('--magnet-x', '0px');
-  target.style.setProperty('--magnet-y', '0px');
+  target.style.setProperty('--tilt-x', '0deg');
+  target.style.setProperty('--tilt-y', '0deg');
+  target.style.setProperty('--image-shift-x', '0px');
+  target.style.setProperty('--image-shift-y', '0px');
+}
+
+function handleBorderGlowPointer(event) {
+  const target = event.currentTarget;
+  const rect = target.getBoundingClientRect();
+
+  target.style.setProperty('--pointer-x', `${event.clientX - rect.left}px`);
+  target.style.setProperty('--pointer-y', `${event.clientY - rect.top}px`);
+}
+
+function resetBorderGlowPointer(event) {
+  const target = event.currentTarget;
+
+  target.style.setProperty('--pointer-x', '50%');
+  target.style.setProperty('--pointer-y', '50%');
 }
 
 function NewsImage({ post, lang, loading = 'lazy' }) {
@@ -604,101 +626,104 @@ function FeaturedHeroCard({ post, lang, copy }) {
   const summary = getPostSummary(post, lang);
 
   return (
-    <article className="featured-hero-card">
-      <Link className="featured-hero-media" to={`/news/${post.slug}`} aria-label={title}>
-        <NewsImage post={post} lang={lang} loading="eager" />
-      </Link>
-      <div className="featured-hero-overlay">
-        <h2>
-          <SplitTextReveal
-            as={Link}
-            to={`/news/${post.slug}`}
-            text={title}
-            className="featured-hero-title-link"
-            splitType="chars"
-            delay={30}
-            startDelay={0.18}
-            duration={1.05}
-            fromY={58}
-          />
-        </h2>
-        {summary && (
-          <p>
-            <SplitTextReveal
-              text={summary}
-              className="featured-hero-summary-text"
-              splitType="chars"
-              delay={11}
-              startDelay={0.72}
-              duration={0.85}
-              fromY={24}
-            />
-          </p>
-        )}
-        <Link
-          className="news-primary-link magnetic-control"
-          to={`/news/${post.slug}`}
-          onPointerMove={handleMagneticPointer}
-          onPointerLeave={resetMagneticPointer}
-        >
-          <span>{copy.readNow}</span>
+    <div className="featured-hero-shell">
+      <h2 className="featured-hero-section-title">{copy.featuredTitle}</h2>
+      <article className="featured-hero-card">
+        <Link className="featured-hero-media" to={`/news/${post.slug}`} aria-label={title}>
+          <NewsImage post={post} lang={lang} loading="eager" />
         </Link>
-      </div>
-    </article>
+        <div className="featured-hero-overlay">
+          <h3>
+            <SplitTextReveal
+              as={Link}
+              to={`/news/${post.slug}`}
+              text={title}
+              className="featured-hero-title-link"
+              splitType="chars"
+              delay={30}
+              startDelay={0.18}
+              duration={1.05}
+              fromY={58}
+            />
+          </h3>
+          {summary && (
+            <p>
+              <SplitTextReveal
+                text={summary}
+                className="featured-hero-summary-text"
+                splitType="chars"
+                delay={11}
+                startDelay={0.72}
+                duration={0.85}
+                fromY={24}
+              />
+            </p>
+          )}
+          <Link
+            className="news-primary-link"
+            to={`/news/${post.slug}`}
+            onPointerMove={handleBorderGlowPointer}
+            onPointerLeave={resetBorderGlowPointer}
+          >
+            <span>{copy.readNow}</span>
+          </Link>
+        </div>
+      </article>
+    </div>
   );
 }
 
-function FeaturedRailCard({ post, lang, copy, phase = 'visible' }) {
+function FeaturedRailCard({ post, lang, phase = 'visible' }) {
   const title = getPostTitle(post, lang);
   const summary = getPostSummary(post, lang);
   const phaseClass = phase && phase !== 'visible' ? ` is-${phase}` : '';
 
   return (
     <article
-      className={`featured-rail-card news-cover-hover-card${phaseClass}`}
+      className={`featured-rail-card interactive-glow-card${phaseClass}`}
       data-rail-phase={phase}
       data-flip-id={`featured-news-${post.id}`}
+      onPointerMove={handlePointerGlow}
+      onPointerLeave={resetPointerGlow}
     >
-      <Link className="news-cover-hover-link" to={`/news/${post.slug}`} aria-label={title}>
-        <span className="featured-rail-media news-cover-hover-media">
-          <NewsImage post={post} lang={lang} />
-        </span>
-        <span className="news-cover-hover-shade" aria-hidden="true" />
-        <span className="featured-rail-body news-cover-hover-content">
-          <span className="news-cover-hover-title">{title}</span>
-          {summary && <span className="news-cover-hover-summary">{summary}</span>}
-          <span className="news-cover-hover-cta">{copy.readNow}</span>
-        </span>
+      <Link className="featured-rail-media" to={`/news/${post.slug}`} aria-label={title}>
+        <NewsImage post={post} lang={lang} />
       </Link>
+      <div className="featured-rail-body">
+        <h3>
+          <Link to={`/news/${post.slug}`}>{title}</Link>
+        </h3>
+        {summary && <p>{summary}</p>}
+      </div>
     </article>
   );
 }
 
-function CategoryPostCard({ post, lang, copy }) {
+function CategoryPostCard({ post, lang }) {
   const title = getPostTitle(post, lang);
-  const summary = getPostSummary(post, lang);
 
   return (
     <Link
-      className="category-news-card news-cover-hover-card"
+      className="category-news-card interactive-glow-card"
       to={`/news/${post.slug}`}
       aria-label={title}
+      onPointerMove={handlePointerGlow}
+      onPointerLeave={resetPointerGlow}
     >
-      <span className="category-news-media news-cover-hover-media">
+      <div className="category-news-media">
         <NewsImage post={post} lang={lang} />
-      </span>
-      <span className="news-cover-hover-shade" aria-hidden="true" />
-      <span className="category-news-body news-cover-hover-content">
-        <span className="news-cover-hover-title">{title}</span>
-        {summary && <span className="news-cover-hover-summary">{summary}</span>}
-        <span className="news-cover-hover-cta">{copy.readNow}</span>
-      </span>
+      </div>
+      <div className="category-news-body">
+        <h3>{title}</h3>
+        <time>{formatDate(getPostDate(post), lang)}</time>
+      </div>
     </Link>
   );
 }
 
-function RecommendedNewsCard({ post, lang }) {
+function RecommendedNewsCard({ post, lang, featured = false }) {
   const title = getPostTitle(post, lang);
+  const className = `news-recommendation-card${post.isPreview ? ' is-preview' : ''}${featured ? ' is-list-featured' : ''}`;
   const cardContent = (
     <>
       <span className="news-recommendation-media">
@@ -713,14 +738,14 @@ function RecommendedNewsCard({ post, lang }) {
 
   if (post.isPreview || !post.slug) {
     return (
-      <article className="news-recommendation-card is-preview">
+      <article className={className}>
         {cardContent}
       </article>
     );
   }
 
   return (
-    <Link className="news-recommendation-card" to={`/news/${post.slug}`} aria-label={title}>
+    <Link className={className} to={`/news/${post.slug}`} aria-label={title}>
       {cardContent}
     </Link>
   );
@@ -861,13 +886,29 @@ function NewsListPage({ lang }) {
   }, [heroPost?.id, sortedPosts]);
 
   const activeCategoryPosts = useMemo(
-    () => sortPosts(posts.filter((post) => post.category === activeCategory)),
-    [activeCategory, posts],
+    () => (activeCategory === 'latest'
+      ? sortedPosts
+      : sortPosts(posts.filter((post) => post.category === activeCategory))),
+    [activeCategory, posts, sortedPosts],
   );
 
   const totalPages = Math.max(1, Math.ceil(activeCategoryPosts.length / CATEGORY_PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const pagePosts = activeCategoryPosts.slice((safePage - 1) * CATEGORY_PAGE_SIZE, safePage * CATEGORY_PAGE_SIZE);
+  const listRecommendationPosts = useMemo(() => {
+    const visibleIds = new Set(pagePosts.map((post) => post.id));
+    const visibleSlugs = new Set(pagePosts.map((post) => post.slug).filter(Boolean));
+    const isNotVisible = (post) => !visibleIds.has(post.id) && !visibleSlugs.has(post.slug);
+    const sameCategory = activeCategoryPosts.filter(isNotVisible);
+    const featured = sortedPosts.filter((post) => post.featured && isNotVisible(post));
+    const latest = sortedPosts.filter(isNotVisible);
+
+    return fillLocalPreviewRelatedPosts(
+      uniquePosts([...sameCategory, ...featured, ...latest]),
+      null,
+      RELATED_NEWS_LIMIT,
+    );
+  }, [activeCategoryPosts, pagePosts, sortedPosts]);
   const committedRailPosts = getCircularWindow(featuredRailPosts, featuredOffset, FEATURED_VISIBLE_COUNT);
   const railItems = featuredTransition?.items
     || committedRailPosts.map((post) => ({ post, phase: 'visible' }));
@@ -1021,16 +1062,18 @@ function NewsListPage({ lang }) {
         {!loading && !error && heroPost && railItems.length > 0 && (
           <div className="news-section-inner">
             <div className="featured-rail-shell">
-              <h2 className="featured-rail-heading">{copy.featuredTitle}</h2>
+              <h2 className="featured-rail-heading sr-only">{copy.featuredTitle}</h2>
               <button
-                className="featured-arrow previous magnetic-control"
+                className="featured-arrow previous"
                 type="button"
                 aria-label={copy.carouselPrev}
                 disabled={!featuredRailCanSlide}
                 onClick={() => moveFeaturedRail(-1)}
-                onPointerMove={handleMagneticPointer}
-                onPointerLeave={resetMagneticPointer}
-              />
+                onPointerMove={handleBorderGlowPointer}
+                onPointerLeave={resetBorderGlowPointer}
+              >
+                <span className="featured-arrow-icon" aria-hidden="true" />
+              </button>
               <div
                 ref={featuredRailRef}
                 className={`featured-rail is-moving-${featuredDirection}`}
@@ -1042,20 +1085,21 @@ function NewsListPage({ lang }) {
                     key={item.post.id}
                     post={item.post}
                     lang={lang}
-                    copy={copy}
                     phase={item.phase}
                   />
                 ))}
               </div>
               <button
-                className="featured-arrow next magnetic-control"
+                className="featured-arrow next"
                 type="button"
                 aria-label={copy.carouselNext}
                 disabled={!featuredRailCanSlide}
                 onClick={() => moveFeaturedRail(1)}
-                onPointerMove={handleMagneticPointer}
-                onPointerLeave={resetMagneticPointer}
-              />
+                onPointerMove={handleBorderGlowPointer}
+                onPointerLeave={resetBorderGlowPointer}
+              >
+                <span className="featured-arrow-icon" aria-hidden="true" />
+              </button>
             </div>
           </div>
         )}
@@ -1083,20 +1127,21 @@ function NewsListPage({ lang }) {
                     className={activeCategory === category.value ? 'active' : ''}
                     style={{ '--tab-index': index }}
                     onClick={() => selectCategory(category.value)}
-                    onPointerMove={handleMagneticPointer}
-                    onPointerLeave={resetMagneticPointer}
+                    onPointerMove={handleBorderGlowPointer}
+                    onPointerLeave={resetBorderGlowPointer}
                   >
-                    {category[lang === 'zh' ? 'zh' : 'en']}
+                    <span>{category[lang === 'zh' ? 'zh' : 'en']}</span>
                   </button>
                 ))}
               </div>
             </div>
 
             {pagePosts.length > 0 ? (
-              <>
+              <div className="category-news-layout">
+                <div className="category-news-main">
                 <div key={`${activeCategory}-${safePage}`} className="category-news-grid">
                   {pagePosts.map((post) => (
-                    <CategoryPostCard key={post.id} post={post} lang={lang} copy={copy} />
+                    <CategoryPostCard key={post.id} post={post} lang={lang} />
                   ))}
                 </div>
 
@@ -1134,7 +1179,23 @@ function NewsListPage({ lang }) {
                     </button>
                   </nav>
                 )}
-              </>
+                </div>
+
+                {listRecommendationPosts.length > 0 && (
+                  <aside className="news-recommendations category-recommendations" aria-label={copy.listRecommended}>
+                    <h2>{copy.listRecommended}</h2>
+                    <div className="news-recommendation-list">
+                      {listRecommendationPosts.map((item) => (
+                        <RecommendedNewsCard
+                          key={item.slug || item.id}
+                          post={item}
+                          lang={lang}
+                        />
+                      ))}
+                    </div>
+                  </aside>
+                )}
+              </div>
             ) : (
               <div className="news-empty compact">
                 <span>{copy.categoryEmpty}</span>
