@@ -1,18 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import usePageTitle from '../hooks/usePageTitle';
 import { useLanguage } from '../context/LanguageContext';
-import './SubPage.css';
+import ShoeGrid from '../components/productCenter/grid/ShoeGrid';
+import './ProductsPage.css';
 
 function ProductsPage() {
   const { t } = useLanguage();
   usePageTitle(t('pages.products.title'));
+
+  useEffect(() => {
+    document.body.classList.add('product-center-active');
+    return () => document.body.classList.remove('product-center-active');
+  }, []);
+
   return (
-    <div className="subpage">
-      <div className="subpage-hero">
-        <h1 className="subpage-hero-title">{t('pages.products.title')}</h1>
-        <p className="subpage-hero-sub">{t('pages.products.sub')}</p>
-      </div>
-      <div className="subpage-content"><p>{t('pages.products.wip')}</p></div>
+    <div className="products-center-page">
+      <ShoeGrid />
     </div>
   );
 }

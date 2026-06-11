@@ -1,0 +1,99 @@
+.products-center-page {
+  min-height: 100vh;
+  background: #f0f0f0;
+}
+
+body.product-center-active {
+  background: #f0f0f0;
+  overflow: hidden;
+}
+
+body.product-center-active .main-header {
+  position: fixed;
+  color: #111827;
+}
+
+body.product-center-active .logo-text {
+  color: #111827;
+}
+
+body.product-center-active .nav-item-box,
+body.product-center-active .lang-trigger-box {
+  background: rgba(17, 24, 39, 0.08);
+  border-color: rgba(17, 24, 39, 0.16);
+  box-shadow: 0 10px 28px rgba(17, 24, 39, 0.08);
+}
+
+body.product-center-active .nav-item-box:hover,
+body.product-center-active .lang-trigger-box:hover {
+  background: rgba(17, 24, 39, 0.14);
+  border-color: rgba(17, 24, 39, 0.24);
+}
+
+body.product-center-active .nav-item-box > a,
+body.product-center-active .lang-text,
+body.product-center-active .arrow-small {
+  color: #111827;
+}
+
+body.product-center-active .lang-dropdown-box,
+body.product-center-active .dropdown {
+  background: rgba(255, 255, 255, 0.78);
+  border-color: rgba(17, 24, 39, 0.12);
+  box-shadow: 0 18px 45px rgba(17, 24, 39, 0.14);
+}
+
+body.product-center-active .dropdown li a,
+body.product-center-active .option-text {
+  color: #111827;
+}
+
+body.product-center-active .dropdown li a:hover,
+body.product-center-active .lang-option:hover,
+body.product-center-active .lang-option.active {
+  background: rgba(17, 24, 39, 0.08);
+}
+
+body.product-center-active .floating-contact {
+  z-index: 120;
+}
+
+body.product-center-active .cookie-bar {
+  display: none;
+}
+
+.product-grid-viewport-mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 90;
+}
+
+.product-grid-viewport-mask-top {
+  top: 0;
+  height: 116px;
+  background: linear-gradient(
+    to bottom,
+    #f0f0f0 0%,
+    rgba(240, 240, 240, 0.96) 50%,
+    rgba(240, 240, 240, 0) 100%
+  );
+}
+
+.product-grid-viewport-mask-bottom {
+  bottom: 0;
+  height: 142px;
+  background: linear-gradient(
+    to top,
+    #f0f0f0 0%,
+    rgba(240, 240, 240, 0.96) 50%,
+    rgba(240, 240, 240, 0) 100%
+  );
+}
+
+@media (max-width: 768px) {
+  body.product-center-active {
+    overflow: auto;
+  }
+}
