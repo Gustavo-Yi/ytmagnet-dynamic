@@ -1,4 +1,4 @@
-/* ── Floating Contact Bar (Right Side) ── */
+/* Floating Contact Bar (Right Side) */
 .floating-contact {
   position: fixed;
   right: 0;
@@ -10,7 +10,6 @@
   gap: 8px;
 }
 
-/* Each button — larger size: 56px */
 .fc-btn {
   position: relative;
   width: 56px;
@@ -18,100 +17,192 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  border-radius: 14px 0 0 14px; /* Attached to right edge */
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-right: none;
+  border-radius: 14px 0 0 14px;
   box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
-  transition: all 0.25s ease;
   color: white;
+  transition:
+    width 0.22s ease,
+    background-color 0.22s ease,
+    box-shadow 0.22s ease;
 }
 
-.fc-btn:hover {
+button.fc-btn,
+.fc-trigger {
+  appearance: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+.fc-btn:hover,
+.fc-btn.is-open {
   width: 62px;
+  box-shadow: -8px 0 26px rgba(15, 23, 42, 0.22);
 }
 
-.fc-btn a {
+.fc-trigger {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
-  color: white;
-  text-decoration: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
 }
 
-/* WhatsApp — vivid green */
+.fc-trigger:focus-visible,
+.fc-top:focus-visible,
+.fc-contact-link:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.9);
+  outline-offset: -4px;
+}
+
 .fc-whatsapp {
-  background: #25d366;
-}
-.fc-whatsapp:hover {
-  background: #128c7e;
+  background: #20c766;
 }
 
-/* Email — vivid blue */
+.fc-whatsapp:hover,
+.fc-whatsapp.is-open {
+  background: #0f9f72;
+}
+
 .fc-email {
-  background: #3b82f6;
-}
-.fc-email:hover {
-  background: #2563eb;
+  background: #2f6df6;
 }
 
-/* Scroll to top — solid white with dark arrow */
+.fc-email:hover,
+.fc-email.is-open {
+  background: #2457d6;
+}
+
 .fc-top {
   background: #ffffff;
   color: #1c1c1e;
 }
+
 .fc-top:hover {
   background: #f2f2f7;
 }
+
 .fc-top svg {
   color: #1c1c1e;
 }
 
-/* ── Tooltip: fixed height so WA and Email tooltips align ── */
 .fc-tooltip {
   position: absolute;
   right: calc(100% + 10px);
   top: 50%;
+  width: max-content;
+  min-width: 246px;
+  max-width: calc(100vw - 96px);
+  display: grid;
+  gap: 8px;
+  padding: 13px 14px;
   transform: translateY(-50%);
-
-  /* Fixed dimensions so both tooltips are identical size */
-  min-width: 190px;
-  height: 56px;                    /* Same height as the button */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 0 16px;
-
-  background: rgba(10, 18, 30, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
-  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgba(31, 41, 55, 0.96), rgba(11, 18, 32, 0.96));
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  pointer-events: auto;
   animation: tooltipFadeIn 0.2s ease both;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-  white-space: nowrap;
+}
+
+.fc-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -12px;
+  width: 12px;
+  height: 100%;
 }
 
 @keyframes tooltipFadeIn {
-  from { opacity: 0; transform: translateY(-50%) translateX(6px); }
-  to   { opacity: 1; transform: translateY(-50%) translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
 }
 
 .fc-tooltip-label {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.5);
-  margin: 0 0 2px;
-  letter-spacing: 0.5px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 12px;
+  font-weight: 650;
   line-height: 1;
 }
 
+.fc-contact-list {
+  display: grid;
+  gap: 4px;
+}
+
+.fc-contact-link {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  padding: 7px 8px;
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+  transition:
+    background-color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.fc-contact-link:hover {
+  background: rgba(255, 255, 255, 0.09);
+  transform: translateX(-2px);
+}
+
 .fc-tooltip-value {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.95);
-  margin: 0;
-  font-weight: 500;
-  line-height: 1;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.96);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .floating-contact {
+    gap: 7px;
+  }
+
+  .fc-btn {
+    width: 52px;
+    height: 52px;
+  }
+
+  .fc-btn:hover,
+  .fc-btn.is-open {
+    width: 58px;
+  }
+
+  .fc-tooltip {
+    right: calc(100% + 8px);
+    min-width: 232px;
+    max-width: calc(100vw - 84px);
+    padding: 12px;
+  }
+
+  .fc-tooltip::after {
+    right: -10px;
+    width: 10px;
+  }
+
+  .fc-tooltip-value {
+    font-size: 13px;
+  }
 }

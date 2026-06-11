@@ -569,48 +569,6 @@ function getPaginationItems(current, total) {
   return pages;
 }
 
-function handlePointerGlow(event) {
-  const target = event.currentTarget;
-  const rect = target.getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const y = event.clientY - rect.top;
-  const xRatio = x / rect.width - 0.5;
-  const yRatio = y / rect.height - 0.5;
-
-  target.style.setProperty('--pointer-x', `${x}px`);
-  target.style.setProperty('--pointer-y', `${y}px`);
-  target.style.setProperty('--tilt-x', `${(-yRatio * 3.6).toFixed(2)}deg`);
-  target.style.setProperty('--tilt-y', `${(xRatio * 3.6).toFixed(2)}deg`);
-  target.style.setProperty('--image-shift-x', `${(xRatio * 8).toFixed(2)}px`);
-  target.style.setProperty('--image-shift-y', `${(yRatio * 8).toFixed(2)}px`);
-}
-
-function resetPointerGlow(event) {
-  const target = event.currentTarget;
-
-  target.style.setProperty('--pointer-x', '50%');
-  target.style.setProperty('--pointer-y', '50%');
-  target.style.setProperty('--tilt-x', '0deg');
-  target.style.setProperty('--tilt-y', '0deg');
-  target.style.setProperty('--image-shift-x', '0px');
-  target.style.setProperty('--image-shift-y', '0px');
-}
-
-function handleBorderGlowPointer(event) {
-  const target = event.currentTarget;
-  const rect = target.getBoundingClientRect();
-
-  target.style.setProperty('--pointer-x', `${event.clientX - rect.left}px`);
-  target.style.setProperty('--pointer-y', `${event.clientY - rect.top}px`);
-}
-
-function resetBorderGlowPointer(event) {
-  const target = event.currentTarget;
-
-  target.style.setProperty('--pointer-x', '50%');
-  target.style.setProperty('--pointer-y', '50%');
-}
-
 function NewsImage({ post, lang, loading = 'lazy' }) {
   return (
     <img
@@ -662,8 +620,6 @@ function FeaturedHeroCard({ post, lang, copy }) {
           <Link
             className="news-primary-link"
             to={`/news/${post.slug}`}
-            onPointerMove={handleBorderGlowPointer}
-            onPointerLeave={resetBorderGlowPointer}
           >
             <span>{copy.readNow}</span>
           </Link>
@@ -680,11 +636,9 @@ function FeaturedRailCard({ post, lang, phase = 'visible' }) {
 
   return (
     <article
-      className={`featured-rail-card interactive-glow-card${phaseClass}`}
+      className={`featured-rail-card${phaseClass}`}
       data-rail-phase={phase}
       data-flip-id={`featured-news-${post.id}`}
-      onPointerMove={handlePointerGlow}
-      onPointerLeave={resetPointerGlow}
     >
       <Link className="featured-rail-media" to={`/news/${post.slug}`} aria-label={title}>
         <NewsImage post={post} lang={lang} />
@@ -704,11 +658,9 @@ function CategoryPostCard({ post, lang }) {
 
   return (
     <Link
-      className="category-news-card interactive-glow-card"
+      className="category-news-card"
       to={`/news/${post.slug}`}
       aria-label={title}
-      onPointerMove={handlePointerGlow}
-      onPointerLeave={resetPointerGlow}
     >
       <div className="category-news-media">
         <NewsImage post={post} lang={lang} />
@@ -1069,8 +1021,6 @@ function NewsListPage({ lang }) {
                 aria-label={copy.carouselPrev}
                 disabled={!featuredRailCanSlide}
                 onClick={() => moveFeaturedRail(-1)}
-                onPointerMove={handleBorderGlowPointer}
-                onPointerLeave={resetBorderGlowPointer}
               >
                 <span className="featured-arrow-icon" aria-hidden="true" />
               </button>
@@ -1095,8 +1045,6 @@ function NewsListPage({ lang }) {
                 aria-label={copy.carouselNext}
                 disabled={!featuredRailCanSlide}
                 onClick={() => moveFeaturedRail(1)}
-                onPointerMove={handleBorderGlowPointer}
-                onPointerLeave={resetBorderGlowPointer}
               >
                 <span className="featured-arrow-icon" aria-hidden="true" />
               </button>
@@ -1127,8 +1075,6 @@ function NewsListPage({ lang }) {
                     className={activeCategory === category.value ? 'active' : ''}
                     style={{ '--tab-index': index }}
                     onClick={() => selectCategory(category.value)}
-                    onPointerMove={handleBorderGlowPointer}
-                    onPointerLeave={resetBorderGlowPointer}
                   >
                     <span>{category[lang === 'zh' ? 'zh' : 'en']}</span>
                   </button>
@@ -1185,11 +1131,12 @@ function NewsListPage({ lang }) {
                   <aside className="news-recommendations category-recommendations" aria-label={copy.listRecommended}>
                     <h2>{copy.listRecommended}</h2>
                     <div className="news-recommendation-list">
-                      {listRecommendationPosts.map((item) => (
+                      {listRecommendationPosts.map((item, index) => (
                         <RecommendedNewsCard
                           key={item.slug || item.id}
                           post={item}
                           lang={lang}
+                          featured={index === 0}
                         />
                       ))}
                     </div>
@@ -1418,8 +1365,8 @@ function NewsDetailPage({ slug, lang }) {
               <aside className="news-recommendations" aria-label={copy.recommended}>
                 <h2>{copy.recommended}</h2>
                 <div className="news-recommendation-list">
-                  {related.map((item) => (
-                    <RecommendedNewsCard key={item.id} post={item} lang={lang} />
+                  {related.map((item, index) => (
+                    <RecommendedNewsCard key={item.id} post={item} lang={lang} featured={index === 0} />
                   ))}
                 </div>
                 <Link className="news-recommendation-more" to="/news">
