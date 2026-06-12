@@ -5,7 +5,7 @@ import React, {
     useLayoutEffect,
 } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useTexture, Text } from "@react-three/drei";
+import { Html, useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { easing } from "maath";
 import { CONFIG } from "./gridConfig";
@@ -60,6 +60,25 @@ const getImageContentBounds = (image) => {
     }
 };
 
+const formatMmValue = (value) => {
+    const numberValue = Number(value);
+    if (!Number.isFinite(numberValue)) return null;
+    return Number.isInteger(numberValue)
+        ? String(numberValue)
+        : String(Number(numberValue.toFixed(2)));
+};
+
+const formatSizeLabel = (item) => {
+    const diameter = formatMmValue(item.diameterMm);
+    const thickness = formatMmValue(item.thicknessMm);
+
+    if (diameter && thickness) {
+        return `${diameter} \u00d7 ${thickness} mm`;
+    }
+
+    return item.title?.replace(/mm$/i, " mm") ?? "";
+};
+
 // --- OPTIMIZED COMPONENT: SHOE TILE ---
 export function ShoeTile({
     data,
@@ -69,6 +88,7 @@ export function ShoeTile({
     transitionStartTime,
     interactive,
     matchesFilter = true,
+    sizeLabelOffsetY = CONFIG.sizeLabelOffsetY,
     gridHeight,
     activeItemId = null,
     onActivateItem,
@@ -76,7 +96,7 @@ export function ShoeTile({
 }) {
     const ref = useRef();
     const imageRef = useRef();
-    const titleRef = useRef();
+    const sizeLabelRef = useRef();
     const [hovered, setHovered] = useState(false);
     const texture = useTexture(data.image_url);
     // Animation Refs
@@ -86,7 +106,6 @@ export function ShoeTile({
     const curveZ = useRef(0);
     const transitionZ = useRef(0);
     const transitionY = useRef(0);
-    const breathScale = useRef(1);
     // Animated position for filter transitions
     const animatedPos = useRef({
         x: basePos.x,
@@ -97,6 +116,7 @@ export function ShoeTile({
     const initialGridVisible = useRef(gridVisible);
     const filterOpacity = useRef(1);
     const filterScale = useRef(1);
+    const sizeLabelOpacity = useRef(0);
     // State to track if we should stop processing entirely (optimization)
     const isSleep = useRef(false);
     // Track if this item was dimmed due to focus mode (for fast recovery)
@@ -139,25 +159,45 @@ export function ShoeTile({
         () => getImageContentBounds(texture.image),
         [texture.image]
     );
-    const closeButtonPosition = useMemo(() => {
-        const fallback = [
-            imageDims.width / 2 - 0.15,
-            imageDims.height / 2 - 0.15,
-            0.02,
-        ];
-        if (!contentBounds) return fallback;
+    const previewScale = useMemo(() => {
+        const physicalScale = data.displayScale ?? 1;
+        const minReadableScale = 0.35;
+        const focusBoost =
+            physicalScale > 0
+                ? Math.max(1, minReadableScale / physicalScale)
+                : 1;
+        return CONFIG.focusScale * focusBoost;
+    }, [data.displayScale]);
+    const { closeButtonPosition, activeSizeLabelPosition } = useMemo(() => {
+        const fallbackRight = imageDims.width / 2;
+        const fallbackTop = imageDims.height / 2;
+        const fallbackBottom = -imageDims.height / 2;
+        const contentRight = contentBounds
+            ? (contentBounds.right - 0.5) * imageDims.width
+            : fallbackRight;
+        const contentTop = contentBounds
+            ? (0.5 - contentBounds.top) * imageDims.height
+            : fallbackTop;
+        const contentBottom = contentBounds
+            ? (0.5 - contentBounds.bottom) * imageDims.height
+            : fallbackBottom;
+        const safePreviewScale = Math.max(previewScale, 0.001);
 
-        const contentRight = (contentBounds.right - 0.5) * imageDims.width;
-        const contentTop = (0.5 - contentBounds.top) * imageDims.height;
-        return [contentRight - 0.08, contentTop - 0.08, 0.02];
-    }, [contentBounds, imageDims]);
-    const textY = useMemo(() => {
-        const fallback = -(imageDims.height / 2) - 0.25;
-        if (!contentBounds) return fallback;
-
-        const contentBottom = (0.5 - contentBounds.bottom) * imageDims.height;
-        return contentBottom - 0.25;
-    }, [contentBounds, imageDims.height]);
+        return {
+            closeButtonPosition: [
+                contentRight + CONFIG.previewCloseGap / safePreviewScale,
+                contentTop + CONFIG.previewCloseGap / safePreviewScale,
+                0.12,
+            ],
+            activeSizeLabelPosition: [
+                0,
+                contentBottom -
+                    CONFIG.previewSizeLabelGap / safePreviewScale,
+                0.12,
+            ],
+        };
+    }, [contentBounds, imageDims, previewScale]);
+    const sizeLabel = useMemo(() => formatSizeLabel(data), [data]);
     const hitAreaDims = useMemo(() => {
         const minHitSize = CONFIG.itemSize * 0.82;
         return {
@@ -319,7 +359,6 @@ export function ShoeTile({
         const isHovered = hovered && interactive;
         let interactionScale = 1.0;
         let interactionOpacity = 1.0;
-        let targetTextOpacity = 0;
         let targetFocusZ = 0;
         if (isFocusMode) {
             if (isActive) {
@@ -331,12 +370,10 @@ export function ShoeTile({
                         : 1;
                 interactionScale = CONFIG.focusScale * focusBoost;
                 interactionOpacity = 1.0;
-                targetTextOpacity = 1.0;
                 targetFocusZ = 2;
             } else {
                 interactionScale = CONFIG.dimScale;
                 interactionOpacity = CONFIG.dimOpacity;
-                targetTextOpacity = 0;
                 targetFocusZ = -0.5;
                 // Track that this item was dimmed
                 wasDimmedByFocus.current = true;
@@ -353,6 +390,17 @@ export function ShoeTile({
             filterOpacity.current;
         const combinedScale =
             interactionScale * filterScale.current;
+        const farLabelVisibility = THREE.MathUtils.smoothstep(
+            zoomRatio,
+            0.32,
+            0.68
+        );
+        const targetSizeLabelOpacity =
+            isActive
+                ? finalOpacity
+                : !isFocusMode && targetTransitionOpacity >= 0.8
+                ? finalOpacity * farLabelVisibility
+                : 0;
         // --- 7. Apply Animations ---
         easing.damp(
             ref.current.scale,
@@ -451,40 +499,16 @@ export function ShoeTile({
                 delta
             );
         }
-        // Only update text opacity if text is actually rendered
-        if (gridVisible) {
-            const textTarget =
-                targetTransitionOpacity < 0.8
-                    ? 0
-                    : targetTextOpacity;
-            if (titleRef.current)
-                easing.damp(
-                    titleRef.current,
-                    "fillOpacity",
-                    textTarget,
-                    0.1,
-                    delta
-                );
-            // Breathing animation for text when active
-            const isActiveItem = rigState.activeId === index;
-            const targetBreath = isActiveItem
-                ? 1 +
-                Math.sin(state.clock.elapsedTime * 2.0) * 0.035
-                : 1;
+        if (sizeLabelRef.current) {
             easing.damp(
-                breathScale,
+                sizeLabelOpacity,
                 "current",
-                targetBreath,
-                0.1,
+                targetSizeLabelOpacity,
+                0.12,
                 delta
             );
-            // Apply breathing scale to text
-            if (titleRef.current) {
-                const groupScale = ref.current?.scale?.x || 1;
-                titleRef.current.scale.setScalar(
-                    breathScale.current / Math.max(groupScale, 0.001)
-                );
-            }
+            sizeLabelRef.current.style.opacity =
+                sizeLabelOpacity.current.toFixed(3);
         }
     });
 
@@ -509,6 +533,10 @@ export function ShoeTile({
         }
     };
     const isActive = gridVisible && activeItemId === index;
+    const sizeLabelPosition = isActive
+        ? activeSizeLabelPosition
+        : [0, sizeLabelOffsetY, 0.08];
+
     return (
         <group ref={ref}>
             <mesh
@@ -537,18 +565,21 @@ export function ShoeTile({
             {/* Do NOT render text if the grid is exiting. Saves massive CPU overhead. */}
             {gridVisible && (
                 <>
-                    <Text
-                        ref={titleRef}
-                        position={[0, textY, 0.01]}
-                        fontSize={0.1}
-                        color="#000"
-                        anchorY="top"
-                        anchorX="center"
-                        maxWidth={2.5}
-                        fillOpacity={0}
-                    >
-                        {data.title}
-                    </Text>
+                    {sizeLabel && (
+                        <Html
+                            position={sizeLabelPosition}
+                            center
+                            zIndexRange={[95, 91]}
+                            style={{ pointerEvents: "none" }}
+                        >
+                            <div
+                                ref={sizeLabelRef}
+                                className="product-size-label"
+                            >
+                                {sizeLabel}
+                            </div>
+                        </Html>
+                    )}
                 </>
             )}
             <CloseButton

@@ -4,7 +4,7 @@ export const DEFAULT_CONFIG = {
   gridCols: 6,
   itemSize: 5,
   gap: 1.2,
-  rowGap: 4.8,
+  rowGap: 5.2,
 
   // Physics
   dragSpeed: 2.2,
@@ -18,7 +18,7 @@ export const DEFAULT_CONFIG = {
   zoomIn: 12,
   zoomOut: 40,
   restingY: -0.45,
-  wallTopInset: 7,
+  wallTopInset: 4.7,
   wallBottomInset: 7,
   zoomDamp: 0.25,
 
@@ -26,6 +26,10 @@ export const DEFAULT_CONFIG = {
   focusScale: 1.6,
   dimScale: 0.5,
   dimOpacity: 0.15,
+  sizeLabelOffsetY: -1.22,
+  sizeLabelScaleOffsetY: 1.45,
+  previewCloseGap: 0.3,
+  previewSizeLabelGap: 0.38,
 
   // 3D Curvature Effect
   curvatureStrength: 0, // Keep the product grid flat and rectilinear.

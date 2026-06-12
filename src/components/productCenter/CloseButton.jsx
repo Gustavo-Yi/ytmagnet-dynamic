@@ -57,21 +57,13 @@ export function CloseButton({
     <Html
       position={[x, y, z]}
       center
+      zIndexRange={[118, 108]}
       style={{
         pointerEvents: "auto",
-        transform: "translate(-50%, -150%)",
       }}
-      occlude
     >
-      <style>
-        {`
-          @keyframes breathe {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.015); }
-          }
-        `}
-      </style>
       <button
+        className="product-preview-close-button"
         aria-label="Close product preview"
         onClick={(e) => {
           e.stopPropagation();
@@ -88,28 +80,15 @@ export function CloseButton({
           }
         }}
         style={{
-          width: "32px",
-          height: "32px",
-          border: "1px solid rgba(0, 0, 0, 1.2)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: "pointer",
-          padding: 0,
-          opacity: shouldShow ? 0.6 : 0,
-          animation: shouldShow
-            ? "breathe 3.14s ease-in-out infinite"
-            : "none",
+          opacity: shouldShow ? 0.88 : 0,
           transform: shouldShow ? "scale(1)" : "scale(0.8)",
-          transition: "opacity 0.2s ease",
-          background: "transparent",
         }}
         onMouseOver={(e) => {
-          e.currentTarget.style.opacity = "0.8";
+          e.currentTarget.style.opacity = "1";
         }}
         onMouseOut={(e) => {
           if (shouldShow) {
-            e.currentTarget.style.opacity = "0.6";
+            e.currentTarget.style.opacity = "0.88";
           }
         }}
       >
@@ -118,8 +97,8 @@ export function CloseButton({
           height="14"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="rgba(0, 0, 0, 0.8)"
-          strokeWidth="2"
+          stroke="currentColor"
+          strokeWidth="2.4"
           strokeLinecap="round"
           strokeLinejoin="round"
         >

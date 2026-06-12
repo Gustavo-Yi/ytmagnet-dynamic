@@ -4,6 +4,13 @@ import { CONFIG } from "./gridConfig";
 import { matchesFilter, calculateGridDimensions } from "./gridState";
 import { ShoeTile } from "./ShoeTile";
 
+const getDisplayScale = (item) => item.displayScale ?? 1;
+
+const getSizeLabelOffsetY = (rowMaxDisplayScale = 1) =>
+    CONFIG.sizeLabelOffsetY -
+    Math.max(0, rowMaxDisplayScale - 0.35) *
+        CONFIG.sizeLabelScaleOffsetY;
+
 // --- OPTIMIZED COMPONENT: GRID CANVAS ---
 // Renders a single set of items with Time-Sliced mounting
 export function GridCanvas({
@@ -26,6 +33,17 @@ export function GridCanvas({
         const filteredCount = filteredItems.length;
         const filteredDims =
             calculateGridDimensions(filteredCount);
+        const rowMaxDisplayScales = filteredItems.reduce(
+            (rows, item, filteredIndex) => {
+                const row = Math.floor(filteredIndex / CONFIG.gridCols);
+                rows[row] = Math.max(
+                    rows[row] ?? 0,
+                    getDisplayScale(item)
+                );
+                return rows;
+            },
+            []
+        );
         const maxDelay = gridVisible
             ? CONFIG.enterStaggerDelay
             : CONFIG.exitStaggerDelay;
@@ -33,10 +51,14 @@ export function GridCanvas({
         const mapped = items.map((shoe, i) => {
             const matches = matchesFilter(shoe, filter);
             let targetPos;
+            let sizeLabelOffsetY = CONFIG.sizeLabelOffsetY;
             if (matches) {
                 const col = filteredIdx % CONFIG.gridCols;
                 const row = Math.floor(
                     filteredIdx / CONFIG.gridCols
+                );
+                sizeLabelOffsetY = getSizeLabelOffsetY(
+                    rowMaxDisplayScales[row]
                 );
                 targetPos = {
                     x:
@@ -72,6 +94,7 @@ export function GridCanvas({
                 randomDelay: Math.random() * maxDelay,
                 basePos: targetPos,
                 matchesFilter: matches,
+                sizeLabelOffsetY,
             };
         });
         return {
@@ -110,6 +133,7 @@ export function GridCanvas({
                         transitionStartTime={transitionStartTime}
                         interactive={interactive && item.matchesFilter}
                         matchesFilter={item.matchesFilter}
+                        sizeLabelOffsetY={item.sizeLabelOffsetY}
                         gridHeight={filteredGridDims.height}
                         activeItemId={activeItemId}
                         onActivateItem={onActivateItem}
