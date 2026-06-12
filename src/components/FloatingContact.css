@@ -96,13 +96,14 @@ button.fc-btn,
   position: absolute;
   right: calc(100% + 10px);
   top: 50%;
+  --fc-tooltip-offset-y: -50%;
   width: max-content;
   min-width: 246px;
   max-width: calc(100vw - 96px);
   display: grid;
   gap: 8px;
   padding: 13px 14px;
-  transform: translateY(-50%);
+  transform: translateY(var(--fc-tooltip-offset-y));
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 14px;
   background:
@@ -112,6 +113,11 @@ button.fc-btn,
   -webkit-backdrop-filter: blur(18px);
   pointer-events: auto;
   animation: tooltipFadeIn 0.2s ease both;
+}
+
+.fc-whatsapp .fc-tooltip {
+  top: 0;
+  --fc-tooltip-offset-y: 0;
 }
 
 .fc-tooltip::after {
@@ -126,11 +132,11 @@ button.fc-btn,
 @keyframes tooltipFadeIn {
   from {
     opacity: 0;
-    transform: translateY(-50%) translateX(8px);
+    transform: translateY(var(--fc-tooltip-offset-y)) translateX(8px);
   }
   to {
     opacity: 1;
-    transform: translateY(-50%) translateX(0);
+    transform: translateY(var(--fc-tooltip-offset-y)) translateX(0);
   }
 }
 

@@ -72,6 +72,7 @@ export function CloseButton({
         `}
       </style>
       <button
+        aria-label="Close product preview"
         onClick={(e) => {
           e.stopPropagation();
           onClose();

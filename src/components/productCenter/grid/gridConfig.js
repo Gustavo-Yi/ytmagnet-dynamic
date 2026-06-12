@@ -1,9 +1,10 @@
 // --- CONFIGURATION ---
 // Default values - will be overridden by controls
 export const DEFAULT_CONFIG = {
-  gridCols: 11,
+  gridCols: 6,
   itemSize: 5,
   gap: 1.2,
+  rowGap: 4.8,
 
   // Physics
   dragSpeed: 2.2,

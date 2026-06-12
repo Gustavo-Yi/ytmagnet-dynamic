@@ -12,10 +12,14 @@ export function GridCanvas({
     transitionStartTime,
     interactive,
     filter = "all",
+    activeItemId = null,
+    onActivateItem,
+    onClearActiveItem,
 }) {
     // Calculate filtered items and their new positions
     const { mappedItems, filteredGridDims } = useMemo(() => {
-        const spacing = CONFIG.itemSize + CONFIG.gap;
+        const columnSpacing = CONFIG.itemSize + CONFIG.gap;
+        const rowSpacing = CONFIG.itemSize + (CONFIG.rowGap ?? CONFIG.gap);
         const filteredItems = items.filter((item) =>
             matchesFilter(item, filter)
         );
@@ -36,13 +40,13 @@ export function GridCanvas({
                 );
                 targetPos = {
                     x:
-                        col * spacing -
+                        col * columnSpacing -
                         filteredDims.width / 2 +
-                        spacing / 2,
+                        columnSpacing / 2,
                     y:
-                        -(row * spacing) +
+                        -(row * rowSpacing) +
                         filteredDims.height / 2 -
-                        spacing / 2,
+                        rowSpacing / 2,
                 };
                 filteredIdx++;
             } else {
@@ -53,13 +57,13 @@ export function GridCanvas({
                 );
                 targetPos = {
                     x:
-                        col * spacing -
+                        col * columnSpacing -
                         originalDims.width / 2 +
-                        spacing / 2,
+                        columnSpacing / 2,
                     y:
-                        -(row * spacing) +
+                        -(row * rowSpacing) +
                         originalDims.height / 2 -
-                        spacing / 2,
+                        rowSpacing / 2,
                 };
             }
             return {
@@ -107,6 +111,9 @@ export function GridCanvas({
                         interactive={interactive && item.matchesFilter}
                         matchesFilter={item.matchesFilter}
                         gridHeight={filteredGridDims.height}
+                        activeItemId={activeItemId}
+                        onActivateItem={onActivateItem}
+                        onClearActiveItem={onClearActiveItem}
                     />
                 );
             })}

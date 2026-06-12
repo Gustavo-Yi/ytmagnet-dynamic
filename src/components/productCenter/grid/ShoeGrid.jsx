@@ -2,6 +2,7 @@ import React, {
     useMemo,
     useState,
     useEffect,
+    useCallback,
     Suspense,
 } from "react";
 import { Canvas } from "@react-three/fiber";
@@ -23,22 +24,13 @@ import { useGridConfig } from "./useGridConfig";
 import { Rig } from "./Rig";
 import { GridCanvas } from "./GridCanvas";
 import { UnifiedControlBar } from "../GridUI";
-import { TopologyBackground } from "../TopologyBackground";
 import "../HoloCardMaterial"; // Registers <holoCardMaterial /> with R3F
 
-// --- PRELOAD ALL TEXTURES ---
-// This ensures all shoe images are cached before switching collections
-shoes.forEach((shoe) => {
-    useTexture.preload(shoe.image_url);
+// --- PRELOAD ALL PRODUCT TEXTURES ---
+// This keeps product images cached before switching filters or collections.
+shoes.forEach((product) => {
+    useTexture.preload(product.image_url);
 });
-
-const SHAPES = ["round", "block", "ring", "arc", "custom"];
-
-const withPlaceholderShapes = (items) =>
-    items.map((item, index) => ({
-        ...item,
-        shape: item.shape || SHAPES[index % SHAPES.length],
-    }));
 
 // --- MAIN EXPORT ---
 export default function ShoeGrid() {
@@ -80,21 +72,24 @@ export default function ShoeGrid() {
         return () => window.removeEventListener("resize", updateResponsiveZoom);
     }, []);
     const [shapeFilter, setShapeFilter] = useState("all");
+    const [activeItemId, setActiveItemId] = useState(null);
+    const clearActiveItem = useCallback(() => {
+        rigState.activeId = null;
+        setActiveItemId(null);
+    }, []);
+    const activateItem = useCallback((index) => {
+        rigState.activeId = index;
+        setActiveItemId(index);
+    }, []);
 
-    // Temporary placeholder collections: Nike images stand in for NdFeB, New Balance for ferrite.
+    // Product collections are now driven by real magnet data only.
     const collectionsData = useMemo(() => {
-        const ndfeb = withPlaceholderShapes(shoes.filter((s) => s.brand === "Nike"));
-        const newBalanceFull = shoes.filter(
-            (s) => s.brand === "New Balance"
+        const ndfeb = shoes.filter(
+            (product) => product.material === "neodymium"
         );
-        const newBalanceHalf = newBalanceFull.slice(0, Math.ceil(newBalanceFull.length / 2));
-        const ferrite = withPlaceholderShapes([
-            ...newBalanceHalf,
-            ...newBalanceHalf.map((s, i) => ({
-                ...s,
-                product_url: `${s.product_url}-dup-${i}`,
-            })),
-        ]);
+        const ferrite = shoes.filter(
+            (product) => product.material === "ferrite"
+        );
         return [ndfeb, ferrite];
     }, []);
     // --- Grid Stack State ---
@@ -132,7 +127,7 @@ export default function ShoeGrid() {
         });
         setActiveCollectionIdx(index);
         setShapeFilter("all");
-        rigState.activeId = null;
+        clearActiveItem();
         // 3. Cleanup old layers after transition time
         setTimeout(() => {
             setGridLayers((prev) =>
@@ -142,8 +137,12 @@ export default function ShoeGrid() {
     };
     const handleZoomTrigger = (target) => {
         if (target === "OUT") {
+            clearActiveItem();
+            rigState.velocity.set(0, 0, 0);
             setRigZoom(CONFIG.zoomOut);
             rigState.target.set(0, homeTargetY, 0);
+            rigState.current.set(0, homeTargetY, 0);
+            setCurrentZoom(CONFIG.zoomOut);
         } else if (typeof target === "number") {
             setRigZoom(target);
         }
@@ -152,7 +151,7 @@ export default function ShoeGrid() {
     const handleShapeFilterChange = (filter) => {
         if (filter === shapeFilter) return;
         setShapeFilter(filter);
-        rigState.activeId = null;
+        clearActiveItem();
     };
     // Determine active grid dimensions for the Rig
     // We use the dimensions of the LAST layer (the incoming one)
@@ -201,15 +200,7 @@ export default function ShoeGrid() {
                 <Rig
                     gridW={activeDims.width}
                     gridH={activeDims.height}
-                />
-                {/* Tech Background - geometric lines and crosshairs for CAD/architectural feel */}
-                <TopologyBackground
-                    isZoomedIn={isZoomedIn}
-                    color={CONFIG.bgColor}
-                    opacity={CONFIG.bgOpacity}
-                    speed={CONFIG.bgSpeed}
-                    scale={CONFIG.bgScale}
-                    lineThickness={CONFIG.bgLineThickness}
+                    onClearActiveItem={clearActiveItem}
                 />
                 <fog
                     attach="fog"
@@ -230,6 +221,11 @@ export default function ShoeGrid() {
                             transitionStartTime={layer.startTime}
                             interactive={layer.mode === "enter"} // Only entering grid is clickable
                             filter={shapeFilter}
+                            activeItemId={
+                                layer.mode === "enter" ? activeItemId : null
+                            }
+                            onActivateItem={activateItem}
+                            onClearActiveItem={clearActiveItem}
                         />
                     ))}
                 </Suspense>

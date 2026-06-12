@@ -7,7 +7,7 @@ import { calculateVerticalTargetBounds, rigState } from "./gridState";
 
 // --- COMPONENT: RIG ---
 // Controls the camera. Moved OUT of GridCanvas so it is persistent.
-export function Rig({ gridW, gridH }) {
+export function Rig({ gridW, gridH, onClearActiveItem }) {
     const { camera, gl } = useThree();
     const prevPos = useRef(new THREE.Vector3());
     const getBounds = useCallback(() => {
@@ -61,7 +61,9 @@ export function Rig({ gridW, gridH }) {
                     : CONFIG.clickThreshold;
             if (maxDragDistance > threshold) {
                 rigState.isDragging = true;
-                rigState.activeId = null;
+                if (rigState.activeId !== null) {
+                    onClearActiveItem?.();
+                }
             }
             const { x: bx, minY, maxY, visibleHeight } = getBounds();
             const sensitivity =
@@ -142,7 +144,7 @@ export function Rig({ gridW, gridH }) {
             window.removeEventListener("pointerup", onUp);
             window.removeEventListener("pointercancel", onUp);
         };
-    }, [gl, camera, getBounds]);
+    }, [gl, camera, getBounds, onClearActiveItem]);
 
     useFrame((state, delta) => {
         easing.damp3(

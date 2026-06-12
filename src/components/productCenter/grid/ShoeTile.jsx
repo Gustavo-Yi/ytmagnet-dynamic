@@ -12,6 +12,54 @@ import { CONFIG } from "./gridConfig";
 import { rigState, setRigZoom } from "./gridState";
 import { CloseButton } from "../CloseButton";
 
+const getImageContentBounds = (image) => {
+    if (typeof document === "undefined" || !image) return null;
+    const width = image.naturalWidth || image.width;
+    const height = image.naturalHeight || image.height;
+    if (!width || !height) return null;
+
+    const sampleSize = 96;
+    const scale = Math.min(1, sampleSize / Math.max(width, height));
+    const canvasWidth = Math.max(1, Math.round(width * scale));
+    const canvasHeight = Math.max(1, Math.round(height * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return null;
+
+    try {
+        ctx.drawImage(image, 0, 0, canvasWidth, canvasHeight);
+        const data = ctx.getImageData(0, 0, canvasWidth, canvasHeight).data;
+        let minX = canvasWidth;
+        let minY = canvasHeight;
+        let maxX = -1;
+        let maxY = -1;
+
+        for (let y = 0; y < canvasHeight; y++) {
+            for (let x = 0; x < canvasWidth; x++) {
+                const alpha = data[(y * canvasWidth + x) * 4 + 3];
+                if (alpha > 12) {
+                    minX = Math.min(minX, x);
+                    minY = Math.min(minY, y);
+                    maxX = Math.max(maxX, x);
+                    maxY = Math.max(maxY, y);
+                }
+            }
+        }
+
+        if (maxX < 0 || maxY < 0) return null;
+        return {
+            left: minX / canvasWidth,
+            top: minY / canvasHeight,
+            right: (maxX + 1) / canvasWidth,
+            bottom: (maxY + 1) / canvasHeight,
+        };
+    } catch {
+        return null;
+    }
+};
+
 // --- OPTIMIZED COMPONENT: SHOE TILE ---
 export function ShoeTile({
     data,
@@ -22,6 +70,9 @@ export function ShoeTile({
     interactive,
     matchesFilter = true,
     gridHeight,
+    activeItemId = null,
+    onActivateItem,
+    onClearActiveItem,
 }) {
     const ref = useRef();
     const imageRef = useRef();
@@ -41,6 +92,9 @@ export function ShoeTile({
         x: basePos.x,
         y: basePos.y,
     });
+    const initialBaseY = useRef(basePos.y);
+    const initialGridHeight = useRef(gridHeight);
+    const initialGridVisible = useRef(gridVisible);
     const filterOpacity = useRef(1);
     const filterScale = useRef(1);
     // State to track if we should stop processing entirely (optimization)
@@ -50,9 +104,12 @@ export function ShoeTile({
     // RESET ANIMATION STATE ON MOUNT
 
     useLayoutEffect(() => {
+        const startingGridHeight = initialGridHeight.current;
         const normalizedY =
-            gridHeight > 0 ? basePos.y / (gridHeight / 2) : 0;
-        if (gridVisible) {
+            startingGridHeight > 0
+                ? initialBaseY.current / (startingGridHeight / 2)
+                : 0;
+        if (initialGridVisible.current) {
             transitionZ.current = CONFIG.enterStartZ;
             transitionY.current =
                 normalizedY * CONFIG.enterSpreadY;
@@ -68,7 +125,8 @@ export function ShoeTile({
         }
     }, []);
     const imageDims = useMemo(() => {
-        const maxSize = CONFIG.itemSize * 0.9;
+        const maxSize =
+            CONFIG.itemSize * 0.9 * (data.displayScale ?? 1);
         if (!texture.image)
             return { width: maxSize, height: maxSize };
         const imgAspect =
@@ -76,7 +134,37 @@ export function ShoeTile({
         return imgAspect > 1
             ? { width: maxSize, height: maxSize / imgAspect }
             : { width: maxSize * imgAspect, height: maxSize };
-    }, [texture]);
+    }, [texture, data.displayScale]);
+    const contentBounds = useMemo(
+        () => getImageContentBounds(texture.image),
+        [texture.image]
+    );
+    const closeButtonPosition = useMemo(() => {
+        const fallback = [
+            imageDims.width / 2 - 0.15,
+            imageDims.height / 2 - 0.15,
+            0.02,
+        ];
+        if (!contentBounds) return fallback;
+
+        const contentRight = (contentBounds.right - 0.5) * imageDims.width;
+        const contentTop = (0.5 - contentBounds.top) * imageDims.height;
+        return [contentRight - 0.08, contentTop - 0.08, 0.02];
+    }, [contentBounds, imageDims]);
+    const textY = useMemo(() => {
+        const fallback = -(imageDims.height / 2) - 0.25;
+        if (!contentBounds) return fallback;
+
+        const contentBottom = (0.5 - contentBounds.bottom) * imageDims.height;
+        return contentBottom - 0.25;
+    }, [contentBounds, imageDims.height]);
+    const hitAreaDims = useMemo(() => {
+        const minHitSize = CONFIG.itemSize * 0.82;
+        return {
+            width: Math.max(imageDims.width * 1.1, minHitSize),
+            height: Math.max(imageDims.height * 1.1, minHitSize),
+        };
+    }, [imageDims]);
     useFrame((state, delta) => {
         // OPTIMIZATION 1: If sleeping or ref missing, stop immediately.
         if (!ref.current || isSleep.current) return;
@@ -235,7 +323,13 @@ export function ShoeTile({
         let targetFocusZ = 0;
         if (isFocusMode) {
             if (isActive) {
-                interactionScale = CONFIG.focusScale;
+                const physicalScale = data.displayScale ?? 1;
+                const minReadableScale = 0.35;
+                const focusBoost =
+                    physicalScale > 0
+                        ? Math.max(1, minReadableScale / physicalScale)
+                        : 1;
+                interactionScale = CONFIG.focusScale * focusBoost;
                 interactionOpacity = 1.0;
                 targetTextOpacity = 1.0;
                 targetFocusZ = 2;
@@ -386,8 +480,9 @@ export function ShoeTile({
             );
             // Apply breathing scale to text
             if (titleRef.current) {
+                const groupScale = ref.current?.scale?.x || 1;
                 titleRef.current.scale.setScalar(
-                    breathScale.current
+                    breathScale.current / Math.max(groupScale, 0.001)
                 );
             }
         }
@@ -400,21 +495,20 @@ export function ShoeTile({
             return;
         }
         e.stopPropagation();
-        if (rigState.activeId === index) {
-            rigState.activeId = null;
+        if (activeItemId === index) {
+            onClearActiveItem?.();
         } else {
             const isZoomedOut = rigState.zoom > CONFIG.zoomIn + 2;
             rigState.target.set(-basePos.x, -basePos.y, 0);
             if (isZoomedOut) {
-                rigState.activeId = index;
+                onActivateItem?.(index);
                 setRigZoom(CONFIG.zoomIn);
             } else {
-                rigState.activeId = index;
+                onActivateItem?.(index);
             }
         }
     };
-    const textY = -(imageDims.height / 2) - 0.25;
-    const isActive = rigState.activeId === index;
+    const isActive = gridVisible && activeItemId === index;
     return (
         <group ref={ref}>
             <mesh
@@ -424,8 +518,8 @@ export function ShoeTile({
             >
                 <planeGeometry
                     args={[
-                        imageDims.width * 1.1,
-                        imageDims.height * 1.1,
+                        hitAreaDims.width,
+                        hitAreaDims.height,
                     ]}
                 />
                 <meshBasicMaterial visible={false} />
@@ -459,13 +553,9 @@ export function ShoeTile({
             )}
             <CloseButton
                 isActive={isActive}
-                position={[
-                    imageDims.width / 2 - 0.15,
-                    imageDims.height / 2 - 0.15,
-                    0.02,
-                ]}
+                position={closeButtonPosition}
                 onClose={() => {
-                    rigState.activeId = null;
+                    onClearActiveItem?.();
                 }}
             />
         </group>
