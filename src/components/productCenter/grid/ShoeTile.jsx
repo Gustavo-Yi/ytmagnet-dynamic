@@ -69,8 +69,15 @@ const formatMmValue = (value) => {
 };
 
 const formatSizeLabel = (item) => {
-    const diameter = formatMmValue(item.diameterMm);
+    const length = formatMmValue(item.lengthMm);
+    const width = formatMmValue(item.widthMm);
     const thickness = formatMmValue(item.thicknessMm);
+
+    if (length && width && thickness) {
+        return `${length} \u00d7 ${width} \u00d7 ${thickness} mm`;
+    }
+
+    const diameter = formatMmValue(item.diameterMm);
 
     if (diameter && thickness) {
         return `${diameter} \u00d7 ${thickness} mm`;
