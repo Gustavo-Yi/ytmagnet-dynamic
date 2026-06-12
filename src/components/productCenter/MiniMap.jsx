@@ -17,7 +17,9 @@ export default function MiniMap({
   const [mapWidthPercent, setMapWidthPercent] = useState(8);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-  const aspectRatio = gridDims.width / gridDims.height;
+  const hasItems =
+    totalItems > 0 && gridDims.width > 0 && gridDims.height > 0;
+  const aspectRatio = hasItems ? gridDims.width / gridDims.height : 1;
   const dpr =
     typeof window !== "undefined"
       ? window.devicePixelRatio || 1
@@ -25,6 +27,10 @@ export default function MiniMap({
 
   // Calculate actual pixel dimensions from percentage, responsive sizing
   useEffect(() => {
+    if (!hasItems) {
+      return;
+    }
+
     const updateDimensions = () => {
       // Larger minimap on mobile
       let widthPercent = 8; // Desktop default
@@ -42,12 +48,17 @@ export default function MiniMap({
     updateDimensions();
     window.addEventListener("resize", updateDimensions);
     return () => window.removeEventListener("resize", updateDimensions);
-  }, [aspectRatio]);
+  }, [aspectRatio, hasItems]);
 
   const cols = config.gridCols;
-  const rows = Math.ceil(totalItems / cols);
+  const rows = Math.max(1, Math.ceil(totalItems / cols));
 
   useEffect(() => {
+    if (!hasItems) {
+      opacityRef.current = 0;
+      return;
+    }
+
     let rafId;
 
     const draw = () => {
@@ -162,7 +173,18 @@ export default function MiniMap({
 
     rafId = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(rafId);
-  }, [gridDims, cols, rows, rigState, config, totalItems, isZoomedIn]);
+  }, [
+    gridDims,
+    cols,
+    rows,
+    rigState,
+    config,
+    totalItems,
+    isZoomedIn,
+    hasItems,
+  ]);
+
+  if (!hasItems) return null;
 
   return (
     <div

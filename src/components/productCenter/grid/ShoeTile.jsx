@@ -79,6 +79,13 @@ const formatSizeLabel = (item) => {
     return item.title?.replace(/mm$/i, " mm") ?? "";
 };
 
+const hideSizeLabel = (labelRef, opacityRef) => {
+    opacityRef.current = 0;
+    if (labelRef.current) {
+        labelRef.current.style.opacity = "0";
+    }
+};
+
 // --- OPTIMIZED COMPONENT: SHOE TILE ---
 export function ShoeTile({
     data,
@@ -243,6 +250,7 @@ export function ShoeTile({
         // Check actual material opacity, not filterOpacity ref, to avoid popping
         const actualOpacity = imageRef.current?.material?.uOpacity ?? 1;
         if (actualOpacity < 0.01 && !matchesFilter) {
+            hideSizeLabel(sizeLabelRef, sizeLabelOpacity);
             ref.current.visible = false;
             return;
         }
@@ -299,6 +307,7 @@ export function ShoeTile({
             targetTransitionOpacity < 0.01 &&
             filterOpacity.current < 0.01
         ) {
+            hideSizeLabel(sizeLabelRef, sizeLabelOpacity);
             ref.current.visible = false;
             isSleep.current = true;
             return;
@@ -308,6 +317,7 @@ export function ShoeTile({
             !isPositionVisible &&
             !(!gridVisible && canTransition)
         ) {
+            hideSizeLabel(sizeLabelRef, sizeLabelOpacity);
             ref.current.visible = false;
             return;
         }
@@ -316,6 +326,7 @@ export function ShoeTile({
             imageRef.current?.material.uOpacity < 0.01 &&
             targetTransitionOpacity < 0.01
         ) {
+            hideSizeLabel(sizeLabelRef, sizeLabelOpacity);
             ref.current.visible = false;
             return;
         }
@@ -398,7 +409,9 @@ export function ShoeTile({
         const targetSizeLabelOpacity =
             isActive
                 ? finalOpacity
-                : !isFocusMode && targetTransitionOpacity >= 0.8
+                : matchesFilter &&
+                  !isFocusMode &&
+                  targetTransitionOpacity >= 0.8
                 ? finalOpacity * farLabelVisibility
                 : 0;
         // --- 7. Apply Animations ---
@@ -565,7 +578,7 @@ export function ShoeTile({
             {/* Do NOT render text if the grid is exiting. Saves massive CPU overhead. */}
             {gridVisible && (
                 <>
-                    {sizeLabel && (
+                    {sizeLabel && matchesFilter && (
                         <Html
                             position={sizeLabelPosition}
                             center
