@@ -10,6 +10,7 @@ import * as THREE from "three";
 import { easing } from "maath";
 import { CONFIG } from "./gridConfig";
 import { rigState, setRigZoom } from "./gridState";
+import { hasGeneratedFerriteTexture } from "./ferriteTextureAssets";
 import { CloseButton } from "../CloseButton";
 
 const getImageContentBounds = (image) => {
@@ -69,9 +70,37 @@ const formatMmValue = (value) => {
 };
 
 const formatSizeLabel = (item) => {
+    const outerRadius = formatMmValue(item.outerRadiusMm);
+    const innerRadius = formatMmValue(item.innerRadiusMm);
+    const arcWidth = formatMmValue(item.widthMm);
+    const arcHeight = formatMmValue(item.heightMm);
+    const arcAngle = formatMmValue(item.angleDeg);
+    const outerDiameter = formatMmValue(item.outerDiameterMm);
+    const innerDiameter = formatMmValue(item.innerDiameterMm);
+    const thickness = formatMmValue(item.thicknessMm);
+
+    if (outerRadius && innerRadius && thickness) {
+        if (arcAngle) {
+            return [
+                `Ro${outerRadius} \u00d7 Ri${innerRadius}`,
+                `A${arcAngle}\u00b0 \u00d7 T${thickness}mm`,
+            ];
+        }
+
+        if (arcWidth && arcHeight) {
+            return [
+                `Ro${outerRadius} \u00d7 Ri${innerRadius}`,
+                `W${arcWidth} \u00d7 H${arcHeight} \u00d7 T${thickness}mm`,
+            ];
+        }
+    }
+
+    if (outerDiameter && innerDiameter && thickness) {
+        return `${outerDiameter} \u00d7 ${innerDiameter} \u00d7 ${thickness} mm`;
+    }
+
     const length = formatMmValue(item.lengthMm);
     const width = formatMmValue(item.widthMm);
-    const thickness = formatMmValue(item.thicknessMm);
 
     if (length && width && thickness) {
         return `${length} \u00d7 ${width} \u00d7 ${thickness} mm`;
@@ -86,12 +115,28 @@ const formatSizeLabel = (item) => {
     return item.title?.replace(/mm$/i, " mm") ?? "";
 };
 
+const renderSizeLabel = (label) =>
+    Array.isArray(label)
+        ? label.map((line) => <span key={line}>{line}</span>)
+        : label;
+
 const hideSizeLabel = (labelRef, opacityRef) => {
     opacityRef.current = 0;
     if (labelRef.current) {
         labelRef.current.style.opacity = "0";
     }
 };
+
+const EMPTY_PRODUCT_TEXTURE =
+    `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"></svg>'
+    )}`;
+
+const getTextureUrl = (item) =>
+    !item.image_url ||
+    (item.material === "ferrite" && !hasGeneratedFerriteTexture(item))
+        ? EMPTY_PRODUCT_TEXTURE
+        : item.image_url;
 
 // --- OPTIMIZED COMPONENT: SHOE TILE ---
 export function ShoeTile({
@@ -112,7 +157,7 @@ export function ShoeTile({
     const imageRef = useRef();
     const sizeLabelRef = useRef();
     const [hovered, setHovered] = useState(false);
-    const texture = useTexture(data.image_url);
+    const texture = useTexture(getTextureUrl(data));
     // Animation Refs
     const focusZ = useRef(0);
     const rotationX = useRef(0);
@@ -556,6 +601,13 @@ export function ShoeTile({
     const sizeLabelPosition = isActive
         ? activeSizeLabelPosition
         : [0, sizeLabelOffsetY, 0.08];
+    const sizeLabelClassName = [
+        "product-size-label",
+        data.shape === "arc" ? "product-size-label--arc" : "",
+        isActive ? "product-size-label--active" : "",
+    ]
+        .filter(Boolean)
+        .join(" ");
 
     return (
         <group ref={ref}>
@@ -594,9 +646,9 @@ export function ShoeTile({
                         >
                             <div
                                 ref={sizeLabelRef}
-                                className="product-size-label"
+                                className={sizeLabelClassName}
                             >
-                                {sizeLabel}
+                                {renderSizeLabel(sizeLabel)}
                             </div>
                         </Html>
                     )}

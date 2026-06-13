@@ -32,7 +32,7 @@ export function UnifiedControlBar({
           { id: "block", label: "方形" },
           { id: "ring", label: "环形" },
           { id: "arc", label: "瓦形" },
-          { id: "custom", label: "异形" },
+          { id: "assembly", label: "磁组件" },
         ]
       : [
           { id: "all", label: "All" },
@@ -40,7 +40,7 @@ export function UnifiedControlBar({
           { id: "block", label: "Block" },
           { id: "ring", label: "Ring" },
           { id: "arc", label: "Arc" },
-          { id: "custom", label: "Custom" },
+          { id: "assembly", label: "Assembly" },
         ];
 
   return (

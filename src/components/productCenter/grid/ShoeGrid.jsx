@@ -3,6 +3,7 @@ import React, {
     useState,
     useEffect,
     useCallback,
+    useRef,
     Suspense,
 } from "react";
 import { Canvas } from "@react-three/fiber";
@@ -19,21 +20,43 @@ import {
     calculateGridDimensions,
     calculateGridHomeTargetY,
     matchesFilter,
+    isMagneticAssembly,
+    isSharedShapeFilter,
 } from "./gridState";
 import { useGridConfig } from "./useGridConfig";
 import { Rig } from "./Rig";
 import { GridCanvas } from "./GridCanvas";
 import { UnifiedControlBar } from "../GridUI";
+import { hasGeneratedFerriteTexture } from "./ferriteTextureAssets";
 import "../HoloCardMaterial"; // Registers <holoCardMaterial /> with R3F
 
 // --- PRELOAD ALL PRODUCT TEXTURES ---
 // This keeps product images cached before switching filters or collections.
 shoes.forEach((product) => {
+    if (
+        product.material === "ferrite" &&
+        !hasGeneratedFerriteTexture(product)
+    ) {
+        return;
+    }
     useTexture.preload(product.image_url);
 });
 
+const getCollectionIndexFromCategory = (category) => {
+    const normalized = String(category ?? "").toLowerCase();
+
+    if (normalized === "ferrite" || normalized === "ferrite-magnets") {
+        return 1;
+    }
+
+    return 0;
+};
+
 // --- MAIN EXPORT ---
-export default function ShoeGrid() {
+export default function ShoeGrid({ initialCategory }) {
+    const initialCollectionIdx =
+        getCollectionIndexFromCategory(initialCategory);
+    const previousCategoryRef = useRef(initialCategory);
     const [initialZoom] = useState(DEFAULT_CONFIG.zoomOut);
     const [currentZoom, setCurrentZoom] = useState(
         rigState.zoom
@@ -84,28 +107,36 @@ export default function ShoeGrid() {
 
     // Product collections are now driven by real magnet data only.
     const collectionsData = useMemo(() => {
+        const sharedAssemblies = shoes.filter(isMagneticAssembly);
         const ndfeb = shoes.filter(
-            (product) => product.material === "neodymium"
+            (product) =>
+                product.material === "neodymium" &&
+                !isMagneticAssembly(product)
         );
         const ferrite = shoes.filter(
-            (product) => product.material === "ferrite"
+            (product) =>
+                product.material === "ferrite" &&
+                !isMagneticAssembly(product)
         );
-        return [ndfeb, ferrite];
+        return [
+            [...ndfeb, ...sharedAssemblies],
+            [...ferrite, ...sharedAssemblies],
+        ];
     }, []);
     // --- Grid Stack State ---
     // Instead of one list of items, we keep a stack of "Rendered Layers".
     // This allows us to have one layer exiting and one layer entering simultaneously.
-    // Initial grid uses the NdFeB placeholder collection (index 0)
+    // Initial grid follows the route category, defaulting to NdFeB.
     const [gridLayers, setGridLayers] = useState(() => [
         {
             id: "init",
-            items: collectionsData[0],
+            items: collectionsData[initialCollectionIdx],
             mode: "enter", // 'enter' | 'exit'
             startTime: 0,
         },
     ]);
     const [activeCollectionIdx, setActiveCollectionIdx] =
-        useState(0);
+        useState(initialCollectionIdx);
     const handleCollectionSwitch = (index) => {
         if (index === activeCollectionIdx) return;
         const now = Date.now();
@@ -126,7 +157,9 @@ export default function ShoeGrid() {
             return [...exitingLayers, newLayer];
         });
         setActiveCollectionIdx(index);
-        setShapeFilter("all");
+        setShapeFilter((prevFilter) =>
+            isSharedShapeFilter(prevFilter) ? prevFilter : "all"
+        );
         clearActiveItem();
         // 3. Cleanup old layers after transition time
         setTimeout(() => {
@@ -135,6 +168,14 @@ export default function ShoeGrid() {
             );
         }, CONFIG.cleanupTimeout);
     };
+
+    useEffect(() => {
+        if (previousCategoryRef.current !== initialCategory) {
+            previousCategoryRef.current = initialCategory;
+            handleCollectionSwitch(initialCollectionIdx);
+        }
+    }, [initialCategory, initialCollectionIdx]);
+
     const handleZoomTrigger = (target) => {
         if (target === "OUT") {
             clearActiveItem();

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import usePageTitle from '../hooks/usePageTitle';
 import { useLanguage } from '../context/LanguageContext';
 import ShoeGrid from '../components/productCenter/grid/ShoeGrid';
@@ -6,6 +7,7 @@ import './ProductsPage.css';
 
 function ProductsPage() {
   const { t } = useLanguage();
+  const { category } = useParams();
   usePageTitle(t('pages.products.title'));
 
   useEffect(() => {
@@ -15,7 +17,7 @@ function ProductsPage() {
 
   return (
     <div className="products-center-page">
-      <ShoeGrid />
+      <ShoeGrid initialCategory={category} />
     </div>
   );
 }

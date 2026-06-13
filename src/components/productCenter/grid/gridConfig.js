@@ -3,8 +3,8 @@
 export const DEFAULT_CONFIG = {
   gridCols: 6,
   itemSize: 5,
-  gap: 1.2,
-  rowGap: 5.2,
+  gap: 2,
+  rowGap: 4.2,
 
   // Physics
   dragSpeed: 2.2,
@@ -18,7 +18,7 @@ export const DEFAULT_CONFIG = {
   zoomIn: 12,
   zoomOut: 40,
   restingY: -0.45,
-  wallTopInset: 4.7,
+  wallTopInset: 5.7,
   wallBottomInset: 7,
   zoomDamp: 0.25,
 

@@ -141,6 +141,123 @@ const LOCAL_PREVIEW_RELATED_NEWS = [
   },
 ];
 
+const LOCAL_NEWS_TEMPLATE_COVER = '/uploads/news/ferrite-neodymium-magnets-cover.png';
+const LOCAL_NEWS_TEMPLATE_SOURCE = [
+  [
+    'company',
+    '宁波钰彤新材料科技有限公司双材料产品线协同升级',
+    'Yutong Magnet upgrades dual-material product lines',
+    '围绕钕铁硼与铁氧体两类磁材，公司优化样品确认、批量排产和质量追踪流程。',
+    'Yutong Magnet is improving sampling, production scheduling, and quality tracking across NdFeB and ferrite product lines.',
+  ],
+  [
+    'company',
+    '海外客户定制磁组件订单完成交付',
+    'Custom magnetic assembly order delivered for overseas customer',
+    '项目覆盖结构设计、磁路优化与装配验证，满足客户对吸附力和耐腐蚀性的要求。',
+    'The project covered structural design, magnetic circuit optimization, and assembly validation for holding force and corrosion resistance.',
+  ],
+  [
+    'company',
+    '质量实验室升级磁性能检测流程',
+    'Quality lab upgrades magnetic performance testing workflow',
+    '通过批次追踪和数据复核，进一步保障钕铁硼、铁氧体产品的一致性。',
+    'Batch tracking and data review help improve consistency across NdFeB and ferrite products.',
+  ],
+  [
+    'company',
+    '自动化包装线进入试运行阶段',
+    'Automated packaging line enters trial operation',
+    '新包装线适配多种磁体规格，减少搬运损耗，提高多批次订单处理效率。',
+    'The new packaging line supports multiple magnet sizes while reducing handling damage.',
+  ],
+  [
+    'industry',
+    '全球稀土磁材市场需求保持增长',
+    'Global rare-earth magnet demand continues to grow',
+    '新能源、自动化和消费电子领域推动高性能磁材需求保持活跃。',
+    'New energy, automation, and electronics continue to drive demand for high-performance magnetic materials.',
+  ],
+  [
+    'industry',
+    '工业自动化带动磁性组件应用升级',
+    'Industrial automation upgrades magnetic assembly applications',
+    '自动化设备对稳定吸附、快速定位和紧凑结构提出更高要求。',
+    'Automation equipment demands stable holding force, fast positioning, and compact structures.',
+  ],
+  [
+    'industry',
+    '小批量多品种订单成为磁材供应链常态',
+    'Low-volume high-mix orders become common in magnet supply chains',
+    '柔性排产、标准化检测和快速打样正在成为磁性材料供应链的重要能力。',
+    'Flexible scheduling, standardized testing, and fast sampling are becoming important supply-chain strengths.',
+  ],
+  [
+    'industry',
+    '海外采购更关注磁体一致性与可追溯性',
+    'Overseas buyers focus more on magnet consistency and traceability',
+    '批次数据、检测报告和包装规范正在影响国际客户的供应商选择。',
+    'Batch data, testing reports, and packaging standards increasingly affect supplier selection.',
+  ],
+  [
+    'faq',
+    '钕铁硼磁体与铁氧体磁体如何选择',
+    'How to choose between NdFeB and ferrite magnets',
+    '从磁力、温度、成本和应用场景四个角度，快速判断项目更适合哪类磁体。',
+    'Compare magnetic force, temperature tolerance, cost, and applications to choose the right magnet.',
+  ],
+  [
+    'faq',
+    '磁力挂钩的吸附力为什么会变化',
+    'Why magnetic hook pull force changes',
+    '吸附面厚度、表面涂层、受力方向和测试方式都会影响实际吸附表现。',
+    'Surface thickness, coating, force direction, and testing method all affect real pull force.',
+  ],
+  [
+    'faq',
+    '耐高温磁体选型需要关注哪些参数',
+    'Key parameters for high-temperature magnet selection',
+    '除了最高工作温度，还要关注剩磁衰减、涂层稳定性和装配环境。',
+    'Beyond maximum working temperature, check magnetic decay, coating stability, and assembly context.',
+  ],
+  [
+    'faq',
+    '磁体运输包装为什么要做隔磁处理',
+    'Why magnet shipments need magnetic shielding',
+    '强磁产品在运输中需要控制外部磁场，降低吸附、碰撞和物流合规风险。',
+    'Strong magnets need field control during shipment to reduce attraction, collision, and logistics compliance risk.',
+  ],
+];
+
+const LOCAL_NEWS_TEMPLATE_POSTS = LOCAL_NEWS_TEMPLATE_SOURCE.map((item, index) => {
+  const [category, titleZh, titleEn, summaryZh, summaryEn] = item;
+  const date = new Date(Date.UTC(2026, 4, 24 - index, 8, 0, 0)).toISOString();
+
+  return {
+    id: `local-template-${index + 1}`,
+    slug: `local-news-template-${index + 1}`,
+    category,
+    status: 'published',
+    pinned: index === 0 ? 1 : 0,
+    featured: index < 6 ? 1 : 0,
+    title_zh: titleZh,
+    title_en: titleEn,
+    summary_zh: summaryZh,
+    summary_en: summaryEn,
+    content_zh: `${summaryZh}\n\n这是一条用于本地预览新闻中心版式的模板内容。正式连接后台后，这里会展示后台填写的新闻正文、产品说明和行业洞察。\n\n页面会保留标题、封面、摘要、分类、发布时间和 SEO 信息，方便开发阶段检查列表、详情页、推荐阅读和分类筛选的视觉效果。`,
+    content_en: `${summaryEn}\n\nThis is local template content used to preview the news center layout. After the admin backend is connected, the page will display the real article body, product notes, and industry insights.\n\nThe page keeps title, cover image, summary, category, publish date, and SEO fields structured for local layout checks.`,
+    cover_image_url: LOCAL_NEWS_TEMPLATE_COVER,
+    cover_image_alt_zh: titleZh,
+    cover_image_alt_en: titleEn,
+    seo_description_zh: summaryZh,
+    seo_description_en: summaryEn,
+    published_at: date,
+    created_at: date,
+    updated_at: date,
+    isLocalTemplate: true,
+  };
+});
+
 const COPY = {
   zh: {
     listTitle: '新闻中心',
@@ -208,6 +325,10 @@ const COPY = {
 
 function getCopy(lang) {
   return COPY[lang === 'zh' ? 'zh' : 'en'];
+}
+
+function getLocalNewsTemplatePosts() {
+  return isLocalPreviewHost() ? LOCAL_NEWS_TEMPLATE_POSTS : [];
 }
 
 function normalizeCategory(value) {
@@ -519,7 +640,7 @@ function pickRelatedPosts(posts, currentPost, limit = RELATED_NEWS_LIMIT) {
 
 function isLocalPreviewHost() {
   if (typeof window === 'undefined') return false;
-  return ['localhost', '127.0.0.1'].includes(window.location.hostname);
+  return ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname);
 }
 
 function prefersReducedMotion() {
@@ -807,11 +928,13 @@ function NewsListPage({ lang }) {
         }
 
         if (alive) {
-          setPosts(Array.isArray(data.data) ? data.data : []);
+          const loadedPosts = Array.isArray(data.data) ? data.data : [];
+          const localPosts = getLocalNewsTemplatePosts();
+          setPosts(loadedPosts.length > 0 ? loadedPosts : localPosts);
         }
       } catch {
         if (alive) {
-          setPosts([]);
+          setPosts(getLocalNewsTemplatePosts());
           setError('');
         }
       } finally {
@@ -1202,7 +1325,19 @@ function NewsDetailPage({ slug, lang }) {
           setRelated(fillLocalPreviewRelatedPosts(relatedPosts, currentPost));
         }
       } catch (err) {
-        if (alive) setError(err.message || copy.notFound);
+        const localPosts = getLocalNewsTemplatePosts();
+        const localPost = localPosts.find((item) => item.slug === slug);
+
+        if (alive && localPost) {
+          setPost(localPost);
+          setRelated(fillLocalPreviewRelatedPosts(
+            pickRelatedPosts(localPosts, localPost),
+            localPost,
+          ));
+          setError('');
+        } else if (alive) {
+          setError(err.message || copy.notFound);
+        }
       } finally {
         if (alive) setLoading(false);
       }

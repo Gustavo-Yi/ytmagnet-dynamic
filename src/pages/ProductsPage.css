@@ -114,6 +114,25 @@ body.product-center-active .cookie-bar {
   will-change: opacity;
 }
 
+.product-size-label--arc {
+  min-width: 136px;
+  padding: 4px 7px;
+  font-size: 11px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.product-size-label--arc span {
+  display: block;
+}
+
+.product-size-label--arc.product-size-label--active {
+  min-width: 166px;
+  padding: 5px 9px;
+  font-size: 13px;
+  line-height: 1.18;
+}
+
 .product-preview-close-button {
   width: 36px;
   height: 36px;

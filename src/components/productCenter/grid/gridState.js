@@ -15,6 +15,14 @@ export const setRigZoom = (zoom) => {
     rigState.zoom = zoom;
 };
 
+export const SHARED_SHAPE_FILTERS = new Set(["assembly"]);
+
+export const isSharedShapeFilter = (filter) =>
+    SHARED_SHAPE_FILTERS.has(filter);
+
+export const isMagneticAssembly = (item) =>
+    item.shape === "assembly" || item.shape === "custom";
+
 // --- HELPER: Grid Dimensions ---
 export const calculateGridDimensions = (count) => {
     const rows = Math.ceil(count / CONFIG.gridCols);
@@ -65,6 +73,10 @@ export const calculateVerticalTargetBounds = (gridH, visibleHeight) => {
 // --- HELPER: Check if item matches filter ---
 export const matchesFilter = (item, filter) => {
     if (filter !== "all") {
+        if (filter === "assembly") {
+            return isMagneticAssembly(item);
+        }
+
         return item.shape === filter;
     }
 
